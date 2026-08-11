@@ -1,0 +1,35 @@
+:root {
+  /* Motion duration tokens */
+  --motion-duration-instant: 0ms;
+  --motion-duration-fast: 120ms;
+  --motion-duration-normal: 200ms;
+  --motion-duration-slow: 320ms;
+  --motion-duration-slower: 500ms;
+}
+
+@theme {
+  /* Motion easing tokens */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+}
+
+@utility duration-instant {
+  transition-duration: var(--motion-duration-instant);
+}
+
+@utility duration-fast {
+  transition-duration: var(--motion-duration-fast);
+}
+
+@utility duration-normal {
+  transition-duration: var(--motion-duration-normal);
+}
+
+@utility duration-slow {
+  transition-duration: var(--motion-duration-slow);
+}
+
+@utility duration-slower {
+  transition-duration: var(--motion-duration-slower);
+}
