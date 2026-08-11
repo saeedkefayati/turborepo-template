@@ -24,6 +24,7 @@
     "@storybook/addon-themes": "^10.5.7",
     "@storybook/addon-vitest": "^10.5.7",
     "@storybook/react-vite": "^10.5.7",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
@@ -33,7 +34,9 @@
     "eslint-plugin-storybook": "^10.5.7",
     "playwright": "latest",
     "storybook": "^10.5.7",
+    "tailwindcss": "^4.3.3",
     "typescript": "5.9.2",
+    "vite": "^8.2.1",
     "vitest": "latest"
   },
   "dependencies": {
