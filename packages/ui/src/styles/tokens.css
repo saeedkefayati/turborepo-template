@@ -1,0 +1,19 @@
+@theme inline {
+  --color-background: var(--ds-background);
+  --color-foreground: var(--ds-foreground);
+
+  --color-surface: var(--ds-surface);
+  --color-surface-muted: var(--ds-surface-muted);
+  --color-surface-elevated: var(--ds-surface-elevated);
+
+  --color-muted-foreground: var(--ds-muted-foreground);
+
+  --color-border: var(--ds-border);
+
+  --color-primary: var(--ds-primary);
+  --color-primary-hover: var(--ds-primary-hover);
+  --color-primary-foreground: var(--ds-primary-foreground);
+
+  --color-danger: var(--ds-danger);
+  --color-danger-foreground: var(--ds-danger-foreground);
+}

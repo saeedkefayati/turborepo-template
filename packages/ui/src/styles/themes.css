@@ -1,0 +1,44 @@
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --ds-background: var(--color-white);
+  --ds-foreground: var(--color-zinc-950);
+
+  --ds-surface: var(--color-zinc-50);
+  --ds-surface-muted: var(--color-zinc-100);
+  --ds-surface-elevated: var(--color-white);
+
+  --ds-muted-foreground: var(--color-zinc-500);
+
+  --ds-border: var(--color-zinc-200);
+
+  --ds-primary: var(--color-violet-600);
+  --ds-primary-hover: var(--color-violet-500);
+  --ds-primary-foreground: var(--color-white);
+
+  --ds-danger: var(--color-red-600);
+  --ds-danger-foreground: var(--color-white);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --ds-background: var(--color-zinc-950);
+  --ds-foreground: var(--color-zinc-50);
+
+  --ds-surface: var(--color-zinc-900);
+  --ds-surface-muted: var(--color-zinc-800);
+  --ds-surface-elevated: var(--color-zinc-900);
+
+  --ds-muted-foreground: var(--color-zinc-400);
+
+  --ds-border: var(--color-zinc-800);
+
+  --ds-primary: var(--color-violet-600);
+  --ds-primary-hover: var(--color-violet-500);
+  --ds-primary-foreground: var(--color-white);
+
+  --ds-danger: var(--color-red-500);
+  --ds-danger-foreground: var(--color-white);
+}
