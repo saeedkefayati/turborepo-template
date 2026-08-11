@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Package manager
+pnpm-lock.yaml
+
+# Turborepo
+.turbo/
+
+# Next.js
+.next/
+out/
+
+# Build outputs
+build/
+dist/
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+
+# Storybook
+storybook-static/
+
+# Generated files
+*.tsbuildinfo
