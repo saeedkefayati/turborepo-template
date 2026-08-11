@@ -1,17 +1,24 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-node_modules
+node_modules/
 .pnp
 .pnp.js
 
 # testing
-coverage
+coverage/
+
+# Playwright
+playwright-report/
+test-results/
+
+# TypeScript
+*.tsbuildinfo
 
 # next.js
 .next/
 out/
-build
+build/
 .swc/
 
 # misc
@@ -30,7 +37,11 @@ yarn-error.log*
 .env.production.local
 
 # turbo
-.turbo
+.turbo/
 
-# ui
+# build outputs
 dist/
+
+# Storybook
+*.storybook.log
+storybook-static/
