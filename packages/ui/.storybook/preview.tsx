@@ -2,6 +2,7 @@ import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview, ReactRenderer } from "@storybook/react-vite";
 
 import "../src/styles/index.css";
+import "./preview.css";
 
 const preview: Preview = {
   decorators: [
@@ -16,6 +17,10 @@ const preview: Preview = {
   ],
 
   parameters: {
+    backgrounds: {
+      disable: true,
+    },
+
     controls: {
       matchers: {
         color: /(background|color)$/i,

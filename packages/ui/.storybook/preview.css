@@ -1,0 +1,19 @@
+html,
+body,
+#storybook-root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+body,
+#storybook-root {
+  background-color: var(--ds-background);
+  color: var(--ds-foreground);
+}
+
+#storybook-root {
+  min-height: 100vh;
+}
