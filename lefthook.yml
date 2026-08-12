@@ -6,6 +6,9 @@ pre-commit:
       group:
         piped: true
         jobs:
+          - name: branch
+            run: pnpm branch:validate
+
           - name: prettier
             run: pnpm exec prettier --write {staged_files}
             glob:
@@ -36,20 +39,26 @@ commit-msg:
       run: pnpm exec commitlint --edit {1}
 
 pre-push:
-  parallel: true
-
   jobs:
-    - name: format
-      run: pnpm format:check
+    - name: branch
+      run: node scripts/git/validate-branch.mjs --stdin
+      use_stdin: true
 
-    - name: lint
-      run: pnpm lint
+    - name: validation
+      group:
+        parallel: true
+        jobs:
+          - name: format
+            run: pnpm format:check
 
-    - name: types
-      run: pnpm check-types
+          - name: lint
+            run: pnpm lint
 
-    - name: ui-tests
-      run: pnpm --filter @repo/ui test-storybook
+          - name: types
+            run: pnpm check-types
 
-    - name: storybook-build
-      run: pnpm --filter @repo/ui build-storybook
+          - name: ui-tests
+            run: pnpm --filter @repo/ui test-storybook
+
+          - name: storybook-build
+            run: pnpm --filter @repo/ui build-storybook
