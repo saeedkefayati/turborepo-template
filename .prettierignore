@@ -11,6 +11,9 @@ pnpm-lock.yaml
 .next/
 out/
 
+# Docusaurus
+.docusaurus/
+
 # Build outputs
 build/
 dist/
