@@ -1,0 +1,11 @@
+{
+  "label": "Maintenance",
+  "position": 7,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Maintenance",
+    "description": "Track dependency management, known issues, and repository maintenance work."
+  }
+}

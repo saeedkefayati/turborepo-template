@@ -1,0 +1,11 @@
+{
+  "label": "Design System",
+  "position": 5,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Design System",
+    "description": "Explore design foundations, shared UI components, Storybook, and component testing."
+  }
+}
