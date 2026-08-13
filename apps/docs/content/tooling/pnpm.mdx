@@ -5,48 +5,177 @@ sidebar_position: 1
 
 # pnpm
 
-pnpm is the repository package manager and workspace manager.
+pnpm is the repository package manager and workspace dependency manager.
 
-The root `package.json` currently declares:
+The currently pinned version is:
 
 ```text
-pnpm@9.0.0
+pnpm 11.21.0
 ```
 
-Workspace discovery is configured in `pnpm-workspace.yaml`:
+## Installation ownership
+
+pnpm is installed by mise through:
+
+```toml
+"npm:pnpm" = "11.21.0"
+```
+
+This does not mean the repository uses npm as its package manager.
+
+npm is only the mise backend used to install the pnpm CLI.
+
+All repository dependency operations use pnpm.
+
+## Package-manager contract
+
+The root `package.json` declares:
+
+```json
+{
+  "packageManager": "pnpm@11.21.0"
+}
+```
+
+This records the package manager and version expected by the repository.
+
+The pnpm project policy also sets:
 
 ```yaml
-packages:
-  - "apps/*"
-  - "packages/*"
+pmOnFail: error
 ```
 
-## Install dependencies
+A package-manager version mismatch therefore fails instead of silently switching package-manager versions.
+
+## Workspace definition
+
+The workspace is defined by:
+
+```text
+pnpm-workspace.yaml
+```
+
+Applications live under:
+
+```text
+apps/*
+```
+
+Shared packages live under:
+
+```text
+packages/*
+```
+
+## Node.js dependency policy
+
+The workspace defines:
+
+```yaml
+nodeVersion: 24.19.0
+engineStrict: true
+```
+
+`nodeVersion` defines the Node.js target used when pnpm evaluates package engine requirements.
+
+`engineStrict` prevents dependencies with incompatible engine requirements from being silently accepted.
+
+The actual local Node.js runtime is installed by mise.
+
+## Dependency build scripts
+
+pnpm dependency build scripts are reviewed explicitly.
+
+The repository enables:
+
+```yaml
+strictDepBuilds: true
+```
+
+Approved build dependencies are recorded under:
+
+```yaml
+allowBuilds:
+  "@swc/core": true
+  core-js: true
+  esbuild: true
+  lefthook: true
+```
+
+New dependency lifecycle scripts should be reviewed before being added to this allowlist.
+
+## Installing dependencies
+
+Use a frozen lockfile for normal repository bootstrap:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+Use a normal install only when intentionally changing dependency resolution:
 
 ```bash
 pnpm install
 ```
 
-Run this command from the repository root.
+## Adding dependencies
 
-## Filter a workspace
-
-pnpm filters allow commands to target a specific workspace.
-
-Examples:
+Add dependencies to the workspace that owns them.
 
 ```bash
-pnpm --filter docs dev
-pnpm --filter docs build
-pnpm --filter @repo/ui test-storybook
+pnpm --filter web add <package>
+pnpm --filter docs add <package>
+pnpm --filter @repo/ui add <package>
 ```
 
-## Workspace dependencies
+Repository-level development tooling should be installed at the workspace root:
 
-Internal dependencies should use the workspace protocol when appropriate:
-
-```text
-workspace:*
+```bash
+pnpm add -Dw <package>
 ```
 
-This ensures local workspace packages are linked consistently.
+## Removing dependencies
+
+```bash
+pnpm --filter web remove <package>
+```
+
+## Lockfile policy
+
+`pnpm-lock.yaml` is committed to Git.
+
+Do not edit it manually.
+
+Dependency changes should be made with pnpm and the resulting lockfile changes should be reviewed.
+
+## pnpm 12
+
+pnpm 12 is intentionally not the repository baseline while it remains prerelease software.
+
+When pnpm 12 becomes stable, evaluate:
+
+- lockfile migration
+- monorepo compatibility
+- native installation through mise
+- Windows x64 and ARM64
+- Linux glibc and musl
+- macOS ARM64
+- install and startup performance
+- CI behavior
+
+The current `npm:pnpm` installation decision may be revisited at that time.
+
+## pnpr
+
+pnpr is an experimental server-side registry and dependency-resolution project from the pnpm ecosystem.
+
+It is not part of the repository toolchain.
+
+It may be reconsidered if the project later requires:
+
+- private package hosting
+- registry caching
+- centralized registry credentials
+- large-scale CI dependency acceleration
+
+The current repository uses the standard pnpm registry workflow.

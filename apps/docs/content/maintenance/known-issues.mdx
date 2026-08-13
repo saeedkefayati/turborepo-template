@@ -65,13 +65,24 @@ Pull requests currently may report no remote checks when no GitHub Actions workf
 
 Local pre-commit and pre-push hooks provide validation today, but remote checks should be added separately.
 
-## Node.js engine alignment
+## Toolchain upgrade tracking
 
-The root package metadata and individual tooling requirements are not yet fully aligned.
+The repository now uses a standardized Node.js and pnpm toolchain managed by mise.
 
-The repository should eventually define a single minimum Node.js version that satisfies all applications and development tools.
+The current baseline is:
 
-This should be handled as a dedicated toolchain migration.
+```text
+Node.js 24.19.0 LTS
+pnpm 11.21.0 stable
+```
+
+Node.js 26 is deferred until it reaches LTS and passes cross-platform validation.
+
+pnpm 12 is deferred until it reaches stable status and passes the complete repository validation suite.
+
+The current pnpm 11 installation uses the mise `npm:pnpm` backend. Reevaluate the native backend after pnpm 12 becomes stable.
+
+pnpr has been evaluated but is deferred while it remains experimental and the repository does not require a private registry or server-side dependency acceleration.
 
 ## Documentation deployment URL
 

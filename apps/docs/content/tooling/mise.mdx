@@ -1,0 +1,155 @@
+---
+title: mise
+sidebar_position: 0
+---
+
+# mise
+
+The repository uses mise as the project toolchain manager.
+
+mise is responsible for installing and selecting the exact versions of development tools required by the repository.
+
+It does not replace pnpm or Turborepo.
+
+## Responsibilities
+
+The toolchain is divided into clear responsibilities:
+
+```text
+mise
+├── Node.js
+└── pnpm CLI
+
+pnpm
+├── workspace dependencies
+├── dependency resolution
+├── lockfile enforcement
+└── package scripts
+
+Turborepo
+└── repository task orchestration
+```
+
+Developers use mise to bootstrap the required toolchain and pnpm for normal repository work.
+
+## Project configuration
+
+The repository declares its toolchain in:
+
+```text
+mise.toml
+```
+
+The current baseline is:
+
+```toml
+min_version = "2026.8.5"
+
+[tools]
+node = "24.19.0"
+"npm:pnpm" = "11.21.0"
+
+[settings]
+lockfile = true
+```
+
+The versions are pinned exactly so that different developers and automation environments do not silently use different toolchain versions.
+
+## Toolchain lockfile
+
+Resolved tool metadata is stored in:
+
+```text
+mise.lock
+```
+
+The lockfile is committed to Git.
+
+For Node.js, the lockfile records platform-specific artifacts and checksums for the supported operating-system and CPU combinations.
+
+The pnpm CLI currently uses the `npm:pnpm` mise backend and therefore uses version-level locking rather than one native standalone artifact per operating system.
+
+## Why `npm:pnpm`
+
+pnpm 11 is installed through mise's npm backend.
+
+This is intentional.
+
+Using the same pnpm installation strategy across Linux, macOS, and Windows avoids operating-system-specific bootstrap logic.
+
+The repository still uses pnpm as its package manager.
+
+`npm:pnpm` describes only how mise installs the pnpm CLI. It does not make npm the repository package manager.
+
+The architecture is:
+
+```text
+mise
+├── Node.js 24.19.0
+└── npm:pnpm 11.21.0
+        │
+        ▼
+      pnpm CLI
+        │
+        ▼
+  repository dependencies
+```
+
+## Why not Corepack
+
+Corepack is not the package-manager owner for this repository.
+
+The project keeps tool installation under mise so that Node.js and pnpm share a single toolchain manager.
+
+This also avoids making future Node.js upgrades depend on Corepack being bundled with Node.js.
+
+## Why not multiple version managers
+
+Do not introduce project-level configuration for additional Node or package-manager version managers such as:
+
+- nvm
+- fnm
+- Volta
+- asdf
+- proto
+- `.nvmrc`
+- `.node-version`
+- `.tool-versions`
+
+Developers may use those tools for unrelated projects, but this repository uses mise as its toolchain source of truth.
+
+## Initial setup
+
+After cloning the repository:
+
+```bash
+mise trust
+mise install --locked
+pnpm install --frozen-lockfile
+```
+
+After the toolchain has been installed, normal development commands continue to use pnpm directly.
+
+```bash
+pnpm dev
+pnpm lint
+pnpm check-types
+pnpm build
+```
+
+## Updating the toolchain
+
+Toolchain changes must be deliberate.
+
+When changing Node.js or pnpm:
+
+1. update `mise.toml`
+2. update the root package metadata
+3. update `pnpm-workspace.yaml` when the Node target changes
+4. regenerate `mise.lock`
+5. run a clean dependency installation
+6. run all repository quality gates
+7. validate the supported operating-system matrix in CI
+8. update the related documentation and ADRs
+
+Do not use floating versions such as `latest`, `lts`, `24`, or `11` in `mise.toml`.

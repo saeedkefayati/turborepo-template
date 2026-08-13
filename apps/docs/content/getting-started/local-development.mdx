@@ -5,71 +5,124 @@ sidebar_position: 3
 
 # Local Development
 
-Start the repository development environment from the repository root:
+The repository uses pnpm workspaces and Turborepo to coordinate applications and shared packages.
+
+mise provides the Node.js and pnpm toolchain.
+
+## Start the entire repository
 
 ```bash
 pnpm dev
 ```
 
-Turborepo starts all workspaces that expose a persistent `dev` task.
-
-## Web application
-
-The Next.js web application runs on:
+Current development services:
 
 ```text
-http://localhost:3000
+web        http://localhost:3000
+docs       http://localhost:3001
+Storybook  http://localhost:6006
 ```
 
-Start it independently:
+## Start individual workspaces
+
+Web application:
 
 ```bash
 pnpm --filter web dev
 ```
 
-## Documentation application
-
-The Docusaurus documentation application runs on:
-
-```text
-http://localhost:3001
-```
-
-Start it independently:
+Documentation:
 
 ```bash
 pnpm --filter docs dev
 ```
 
-## Design system
+Storybook:
 
-The shared UI package exposes Storybook as its development environment.
-
-Storybook runs on:
-
-```text
-http://localhost:6006
+```bash
+pnpm --filter @repo/ui dev
 ```
 
-It starts automatically with the repository development command:
+## Daily workflow
+
+Once the repository toolchain has been installed, normal development uses pnpm directly.
 
 ```bash
 pnpm dev
+pnpm format
+pnpm lint
+pnpm check-types
+pnpm build
 ```
 
-It can also be started independently through the UI workspace.
+mise does not replace these commands.
 
-## Common validation commands
+Use mise when bootstrapping or updating the project toolchain.
 
-Before committing substantial changes, run:
+```bash
+mise install --locked
+```
+
+## Adding dependencies
+
+Add an application dependency to the workspace that owns it.
+
+Web:
+
+```bash
+pnpm --filter web add <package>
+```
+
+Documentation:
+
+```bash
+pnpm --filter docs add <package>
+```
+
+UI package:
+
+```bash
+pnpm --filter @repo/ui add <package>
+```
+
+Add a development dependency:
+
+```bash
+pnpm --filter web add -D <package>
+```
+
+Add a repository-level development tool:
+
+```bash
+pnpm add -Dw <package>
+```
+
+Remove a dependency from a workspace:
+
+```bash
+pnpm --filter web remove <package>
+```
+
+Do not manually edit `pnpm-lock.yaml`.
+
+## Validation
+
+Before a substantial commit, run:
 
 ```bash
 pnpm format:check
-pnpm build
 pnpm lint
 pnpm check-types
+pnpm build
 ```
 
-The formatting check validates regular repository files with Prettier and Docusaurus MDX content with Remark.
+UI work should additionally validate:
 
-Git hooks perform additional validation automatically during commit and push operations.
+```bash
+pnpm --filter @repo/ui test-storybook
+pnpm --filter @repo/ui build-storybook
+```
+
+Git hooks provide additional local validation.
+
+Future remote CI is expected to reproduce the critical repository quality gates on supported operating systems.

@@ -90,3 +90,34 @@ _category_.json
 Individual documents use MDX front matter for metadata such as titles and sidebar ordering.
 
 The documentation site is configured in docs-only mode, so documentation routes are served from the site root.
+
+## Toolchain
+
+Repository development uses mise to provision the pinned Node.js and pnpm versions.
+
+The current baseline is:
+
+```text
+Node.js 24.19.0 LTS
+pnpm 11.21.0 stable
+```
+
+After cloning the repository:
+
+```bash
+mise trust
+mise install --locked
+pnpm install --frozen-lockfile
+```
+
+mise manages the external development toolchain.
+
+pnpm remains the repository package manager and is used for dependency management, workspace operations, and repository scripts.
+
+For the complete rationale, platform support matrix, and upgrade policy, see the engineering documentation under:
+
+- Getting Started
+- Tooling / mise
+- Tooling / pnpm
+- Maintenance / Cross-Platform Support
+- ADR-008: Standardize the Cross-Platform Toolchain
