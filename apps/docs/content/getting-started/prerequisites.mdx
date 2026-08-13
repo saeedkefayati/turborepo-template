@@ -1,0 +1,61 @@
+---
+title: Prerequisites
+sidebar_position: 1
+---
+
+# Prerequisites
+
+Before working with the repository, make sure the required development tools are available locally.
+
+## Git
+
+Git is required for source control, branch creation, commits, pull requests, and repository history.
+
+Verify the installation:
+
+```bash
+git --version
+```
+
+## Node.js
+
+The repository uses modern JavaScript and TypeScript tooling.
+
+The Docusaurus application requires Node.js 20 or newer. Other repository tooling may require a newer runtime, so using a current Node.js release is recommended.
+
+Verify the active version:
+
+```bash
+node --version
+```
+
+## pnpm
+
+The repository uses pnpm workspaces.
+
+The root `package.json` currently pins:
+
+```text
+pnpm@9.0.0
+```
+
+Verify pnpm:
+
+```bash
+pnpm --version
+```
+
+Use the repository-defined package manager version when possible to keep the lockfile deterministic.
+
+## GitHub CLI
+
+GitHub CLI is optional for local development but recommended for the repository workflow.
+
+It allows pull requests to be created, reviewed, and merged directly from the terminal.
+
+Verify it with:
+
+```bash
+gh --version
+gh auth status
+```

@@ -10,6 +10,8 @@
     "clear": "docusaurus clear",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
+    "format:mdx": "remark \"content/**/*.mdx\" --ext mdx --output --quiet && pnpm check:mdx",
+    "check:mdx": "remark \"content/**/*.mdx\" --ext mdx --no-stdout --frail",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,6 +32,13 @@
     "@types/react": "19.2.2",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
+    "remark-cli": "^12.0.1",
+    "remark-directive": "^4.0.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
+    "remark-preset-lint-consistent": "^6.0.1",
+    "remark-preset-lint-recommended": "^7.0.1",
     "typescript": "5.9.2"
   },
   "browserslist": {

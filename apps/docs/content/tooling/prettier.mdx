@@ -1,0 +1,77 @@
+---
+title: Prettier
+sidebar_position: 5
+---
+
+# Prettier
+
+Prettier is the primary formatter for regular repository source and configuration files.
+
+The root configuration is stored in:
+
+```text
+prettier.config.mjs
+```
+
+## Responsibilities
+
+Prettier formats supported repository files such as:
+
+- JavaScript
+- TypeScript
+- TSX
+- JSON
+- CSS
+- YAML
+- regular Markdown
+
+Docusaurus MDX content is intentionally excluded from Prettier.
+
+The exclusion is configured in:
+
+```text
+.prettierignore
+```
+
+and applies to:
+
+```text
+apps/docs/content/**/*.mdx
+```
+
+MDX content is formatted and validated by Remark instead.
+
+## Commands
+
+Format the repository:
+
+```bash
+pnpm format
+```
+
+Validate formatting and documentation content:
+
+```bash
+pnpm format:check
+```
+
+The root formatting workflow coordinates both Prettier and Remark so developers do not need to run each formatter manually.
+
+## Generated files
+
+Generated directories are excluded from formatting.
+
+Examples include:
+
+```text
+node_modules/
+.turbo/
+.next/
+.docusaurus/
+build/
+dist/
+coverage/
+storybook-static/
+```
+
+Generated output should never be formatted manually.

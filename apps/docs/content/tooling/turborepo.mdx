@@ -1,0 +1,53 @@
+---
+title: Turborepo
+sidebar_position: 2
+---
+
+# Turborepo
+
+Turborepo coordinates repository tasks across applications and packages.
+
+Root commands delegate work to Turbo:
+
+```bash
+pnpm dev
+pnpm build
+pnpm lint
+pnpm check-types
+```
+
+## Build
+
+The build task depends on builds from upstream workspace dependencies.
+
+Cached production outputs include:
+
+```text
+.next/**
+build/**
+```
+
+Next.js cache and development outputs are excluded where appropriate.
+
+## Development
+
+Development tasks are:
+
+- persistent
+- not cached
+
+This allows application development servers to remain active.
+
+## Type checking
+
+The root type-check command executes:
+
+```bash
+turbo run check-types
+```
+
+Each participating workspace defines its own implementation of the task.
+
+## Linting
+
+Repository workspaces expose a common `lint` task which Turbo runs across the dependency graph.

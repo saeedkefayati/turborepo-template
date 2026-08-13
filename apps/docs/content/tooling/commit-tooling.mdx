@@ -1,0 +1,63 @@
+---
+title: Commit Tooling
+sidebar_position: 8
+---
+
+# Commit Tooling
+
+The repository combines Commitizen, cz-git, and Commitlint to provide structured commit messages.
+
+## Interactive commits
+
+Use:
+
+```bash
+pnpm commit
+```
+
+This launches the interactive cz-git workflow.
+
+## Commit format
+
+Commit messages follow the Conventional Commits model:
+
+```text
+type(scope): subject
+```
+
+Example:
+
+```text
+feat(docs): migrate documentation site to Docusaurus
+```
+
+## Supported commit types
+
+The repository currently accepts:
+
+```text
+feat
+fix
+refactor
+perf
+test
+docs
+style
+build
+ci
+chore
+revert
+```
+
+## Commit validation
+
+Commitlint requires:
+
+- a valid type
+- a scope
+- a non-empty subject
+- kebab-case scopes
+- a sufficiently descriptive subject
+- a header within the configured length limit
+
+Native `git commit` remains supported, but the final commit message still passes through the Commitlint hook.

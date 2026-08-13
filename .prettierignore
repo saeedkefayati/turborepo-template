@@ -14,6 +14,10 @@ out/
 # Docusaurus
 .docusaurus/
 
+# Docusaurus MDX content
+# MDX v3 content is formatted and validated by Remark.
+apps/docs/content/**/*.mdx
+
 # Build outputs
 build/
 dist/

@@ -1,0 +1,60 @@
+---
+title: TypeScript
+sidebar_position: 3
+---
+
+# TypeScript
+
+TypeScript is used throughout the repository.
+
+The root repository currently pins TypeScript 5.9.2.
+
+## Shared configurations
+
+Reusable TypeScript presets live under:
+
+```text
+packages/typescript-config/
+```
+
+The package currently contains:
+
+```text
+base.json
+nextjs.json
+react-library.json
+```
+
+Applications and packages extend the configuration appropriate for their environment.
+
+## Docusaurus
+
+The docs application extends:
+
+```text
+@docusaurus/tsconfig
+```
+
+and runs:
+
+```bash
+tsc --noEmit
+```
+
+through:
+
+```bash
+pnpm --filter docs check-types
+```
+
+## VS Code
+
+The repository includes a workspace setting that points JavaScript and TypeScript tooling to the repository installation:
+
+```json
+{
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
+}
+```
+
+This keeps editor diagnostics aligned with the TypeScript version used by repository commands.

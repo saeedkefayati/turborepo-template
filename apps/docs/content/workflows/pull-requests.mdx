@@ -1,0 +1,75 @@
+---
+title: Pull Requests
+sidebar_position: 3
+---
+
+# Pull Requests
+
+GitHub Pull Requests are used to merge completed branches into their target branch.
+
+## Push a branch
+
+```bash
+git push -u origin <branch>
+```
+
+The repository pre-push hooks run before the branch reaches the remote.
+
+## Create a pull request
+
+GitHub CLI can create the PR directly from the terminal:
+
+```bash
+gh pr create \
+  --base develop \
+  --head <branch>
+```
+
+Review the current pull request:
+
+```bash
+gh pr view
+```
+
+Check remote CI status:
+
+```bash
+gh pr checks
+```
+
+## Merge
+
+For feature and documentation branches, merge commits preserve the branch boundary in repository history.
+
+Interactive merge:
+
+```bash
+gh pr merge
+```
+
+Or explicitly:
+
+```bash
+gh pr merge --merge
+```
+
+## After merging
+
+Update the target branch:
+
+```bash
+git switch develop
+git pull --ff-only origin develop
+```
+
+Delete the merged local branch:
+
+```bash
+git branch -d <branch>
+```
+
+Delete the remote branch:
+
+```bash
+git push origin --delete <branch>
+```

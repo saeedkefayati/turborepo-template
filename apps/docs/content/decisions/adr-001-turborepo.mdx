@@ -1,0 +1,23 @@
+---
+title: "ADR-001: Use Turborepo"
+sidebar_position: 2
+---
+
+# ADR-001: Use Turborepo
+
+**Status:** Accepted
+
+## Context
+
+The repository contains multiple applications and reusable packages that share development tasks and dependencies.
+
+## Decision
+
+Use Turborepo to orchestrate workspace tasks such as development, builds, linting, and type checking.
+
+## Consequences
+
+- workspace tasks share a common execution model
+- dependency-aware task ordering is centralized
+- build outputs can be cached
+- applications and packages retain their own task implementations

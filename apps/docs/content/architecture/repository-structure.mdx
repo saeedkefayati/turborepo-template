@@ -1,0 +1,67 @@
+---
+title: Repository Structure
+sidebar_position: 2
+---
+
+# Repository Structure
+
+The high-level repository structure is:
+
+```text
+.
+├── apps/
+│   ├── docs/
+│   └── web/
+│
+├── packages/
+│   ├── eslint-config/
+│   ├── typescript-config/
+│   └── ui/
+│
+├── scripts/
+│   └── git/
+│
+├── commitlint.config.mjs
+├── eslint.config.mjs
+├── lefthook.yml
+├── package.json
+├── pnpm-workspace.yaml
+├── prettier.config.mjs
+├── turbo.json
+└── pnpm-lock.yaml
+```
+
+## `apps/`
+
+Contains deployable or independently runnable applications.
+
+## `packages/`
+
+Contains reusable workspace packages.
+
+Packages should expose reusable functionality without depending on application-specific implementation details.
+
+## `scripts/git/`
+
+Contains repository-specific Git workflow tooling:
+
+```text
+branch-policy.mjs
+branch.mjs
+scopes.mjs
+validate-branch.mjs
+```
+
+## Root configuration
+
+Repository-wide tooling is configured at the root whenever possible.
+
+Examples include:
+
+- Turborepo task orchestration
+- Prettier formatting
+- Commitlint rules
+- Git hooks
+- workspace package management
+
+This reduces configuration drift between workspaces.
