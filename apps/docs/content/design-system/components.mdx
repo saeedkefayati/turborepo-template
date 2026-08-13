@@ -1,0 +1,47 @@
+---
+title: Components
+sidebar_position: 2
+---
+
+# Components
+
+Reusable UI components live in the shared `@repo/ui` package.
+
+Components should provide stable public APIs and remain independent of application-specific business logic.
+
+## Button
+
+The current component foundation includes a reusable Button primitive.
+
+Supported variants include:
+
+```text
+primary
+secondary
+outline
+ghost
+danger
+```
+
+Supported sizes include:
+
+```text
+sm
+md
+lg
+icon
+```
+
+The component supports:
+
+- native button behavior
+- refs
+- disabled state
+- loading state
+- accessibility state through `aria-busy`
+
+Variant composition uses Class Variance Authority.
+
+Class composition uses `clsx` and `tailwind-merge` through the shared `cn()` utility.
+
+The public package export allows consumers to import the component through the UI package instead of internal implementation paths.

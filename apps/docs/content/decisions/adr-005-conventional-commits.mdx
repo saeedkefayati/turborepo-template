@@ -1,0 +1,25 @@
+---
+title: "ADR-005: Use Conventional Commits"
+sidebar_position: 6
+---
+
+# ADR-005: Use Conventional Commits
+
+**Status:** Accepted
+
+## Context
+
+Repository history should communicate the intent and scope of each change consistently.
+
+## Decision
+
+Use Conventional Commit-style messages validated by Commitlint.
+
+Use Commitizen and cz-git as the interactive commit interface.
+
+## Consequences
+
+- commit history has a predictable format
+- scopes communicate the affected area
+- invalid commit messages are rejected automatically
+- native Git commits remain possible when they satisfy repository rules

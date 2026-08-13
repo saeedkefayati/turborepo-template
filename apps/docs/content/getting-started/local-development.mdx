@@ -1,0 +1,75 @@
+---
+title: Local Development
+sidebar_position: 3
+---
+
+# Local Development
+
+Start the repository development environment from the repository root:
+
+```bash
+pnpm dev
+```
+
+Turborepo starts all workspaces that expose a persistent `dev` task.
+
+## Web application
+
+The Next.js web application runs on:
+
+```text
+http://localhost:3000
+```
+
+Start it independently:
+
+```bash
+pnpm --filter web dev
+```
+
+## Documentation application
+
+The Docusaurus documentation application runs on:
+
+```text
+http://localhost:3001
+```
+
+Start it independently:
+
+```bash
+pnpm --filter docs dev
+```
+
+## Design system
+
+The shared UI package exposes Storybook as its development environment.
+
+Storybook runs on:
+
+```text
+http://localhost:6006
+```
+
+It starts automatically with the repository development command:
+
+```bash
+pnpm dev
+```
+
+It can also be started independently through the UI workspace.
+
+## Common validation commands
+
+Before committing substantial changes, run:
+
+```bash
+pnpm format:check
+pnpm build
+pnpm lint
+pnpm check-types
+```
+
+The formatting check validates regular repository files with Prettier and Docusaurus MDX content with Remark.
+
+Git hooks perform additional validation automatically during commit and push operations.

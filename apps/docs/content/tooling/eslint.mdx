@@ -1,0 +1,65 @@
+---
+title: ESLint
+sidebar_position: 4
+---
+
+# ESLint
+
+ESLint provides static analysis and repository code-quality enforcement.
+
+Shared configurations live in:
+
+```text
+packages/eslint-config/
+```
+
+Available configurations include:
+
+```text
+@repo/eslint-config/base
+@repo/eslint-config/next-js
+@repo/eslint-config/react-internal
+```
+
+## Import ordering
+
+The shared base configuration uses `eslint-plugin-perfectionist`.
+
+Imports are grouped conceptually as:
+
+1. JavaScript side effects
+2. Node built-ins
+3. React
+4. framework imports
+5. external packages
+6. workspace packages
+7. internal aliases
+8. relative imports
+9. styles
+
+Named imports use natural ordering.
+
+## Type imports
+
+TypeScript imports are required to use explicit type imports where appropriate.
+
+The repository enables:
+
+```text
+@typescript-eslint/consistent-type-imports
+@typescript-eslint/no-import-type-side-effects
+```
+
+## Commands
+
+Run all workspace lint tasks:
+
+```bash
+pnpm lint
+```
+
+Apply supported automatic fixes:
+
+```bash
+pnpm lint:fix
+```

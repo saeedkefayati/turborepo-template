@@ -1,0 +1,47 @@
+---
+title: Dependency Management
+sidebar_position: 1
+---
+
+# Dependency Management
+
+Dependency changes should be intentional and isolated from unrelated feature work.
+
+## Install dependencies
+
+```bash
+pnpm install
+```
+
+The root `pnpm-lock.yaml` represents the dependency graph for the entire workspace.
+
+## Updating dependencies
+
+Before upgrading packages:
+
+1. review the relevant changelog
+2. identify runtime and peer-dependency requirements
+3. update the smallest reasonable dependency scope
+4. run the complete repository validation suite
+5. review the lockfile diff before committing
+
+## Toolchain migrations
+
+Large toolchain changes should use dedicated branches and commits.
+
+Examples include:
+
+- Node.js requirement changes
+- pnpm major upgrades
+- TypeScript major upgrades
+- Storybook upgrades
+- Next.js upgrades
+- Docusaurus upgrades
+
+Avoid combining these migrations with unrelated product or documentation work.
+
+## Security
+
+Dependency security findings should be reviewed through GitHub dependency tooling and addressed in dedicated security or dependency maintenance work.
+
+Do not hardcode vulnerability counts in long-lived documentation because those values change over time.

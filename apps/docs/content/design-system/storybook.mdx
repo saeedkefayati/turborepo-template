@@ -1,0 +1,53 @@
+---
+title: Storybook
+sidebar_position: 3
+---
+
+# Storybook
+
+Storybook is the primary development environment for the shared design system.
+
+It is configured inside:
+
+```text
+packages/ui/
+```
+
+Storybook is used to:
+
+- develop components in isolation
+- preview design foundations
+- document supported component variants
+- validate component behavior
+- run browser-based story tests
+- produce a static design-system build
+
+## Development server
+
+The Storybook development server runs on:
+
+```text
+http://localhost:6006
+```
+
+It is included in the repository-wide development workflow:
+
+```bash
+pnpm dev
+```
+
+This starts the web application, documentation application, and Storybook development environment together.
+
+## Production build
+
+```bash
+pnpm --filter @repo/ui build-storybook
+```
+
+The generated static output is written to:
+
+```text
+packages/ui/storybook-static/
+```
+
+Generated Storybook output is ignored by Git and repository formatting tools.

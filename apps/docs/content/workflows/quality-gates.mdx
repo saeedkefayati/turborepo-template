@@ -1,0 +1,67 @@
+---
+title: Quality Gates
+sidebar_position: 4
+---
+
+# Quality Gates
+
+Repository quality is enforced through local scripts, Turborepo tasks, formatters, linters, and Lefthook Git hooks.
+
+## Manual validation
+
+A complete local validation pass is:
+
+```bash
+pnpm format:check
+pnpm build
+pnpm lint
+pnpm check-types
+git diff --check
+```
+
+The formatting check combines:
+
+```text
+Prettier
+→ regular repository files
+
+Remark
+→ Docusaurus MDX content
+```
+
+## Pre-commit
+
+The pre-commit hook validates the branch and staged source files.
+
+It can automatically format:
+
+- regular supported files with Prettier
+- Docusaurus MDX files with Remark
+
+ESLint fixes supported JavaScript and TypeScript files.
+
+The hook also runs repository type checking and conditionally executes UI Storybook tests when matching UI files are staged.
+
+## Commit message
+
+Commitlint validates the final commit message.
+
+## Pre-push
+
+The pre-push hook performs the strongest local validation:
+
+```text
+branch validation
+format check
+MDX validation
+lint
+type check
+UI Storybook tests
+Storybook production build
+```
+
+## Remote enforcement
+
+Local hooks can be bypassed and therefore should not be considered the final trust boundary.
+
+GitHub Actions and branch protection should eventually reproduce critical validation remotely before protected branches can be updated.

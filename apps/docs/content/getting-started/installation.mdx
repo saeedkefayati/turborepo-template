@@ -1,0 +1,49 @@
+---
+title: Installation
+sidebar_position: 2
+---
+
+# Installation
+
+Clone the repository and install all workspace dependencies from the repository root.
+
+```bash
+git clone https://github.com/saeedkefayati/turborepo-template.git
+cd turborepo-template
+pnpm install
+```
+
+pnpm discovers workspace projects through `pnpm-workspace.yaml`.
+
+The current workspace includes:
+
+```text
+apps/*
+packages/*
+```
+
+Dependencies shared across workspaces are resolved through the root lockfile.
+
+Workspace-to-workspace dependencies use the `workspace:*` protocol where appropriate.
+
+## Verify the installation
+
+Run the type checker:
+
+```bash
+pnpm check-types
+```
+
+Run linting:
+
+```bash
+pnpm lint
+```
+
+Run formatting validation:
+
+```bash
+pnpm format:check
+```
+
+If all commands succeed, the repository is ready for local development.

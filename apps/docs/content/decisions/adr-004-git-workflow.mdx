@@ -1,0 +1,35 @@
+---
+title: "ADR-004: Git Flow-Inspired Branching"
+sidebar_position: 5
+---
+
+# ADR-004: Git Flow-Inspired Branching
+
+**Status:** Accepted
+
+## Context
+
+The repository needs predictable branch names, clear integration boundaries, and automated branch validation.
+
+## Decision
+
+Use a Git Flow-inspired model with `main` and `develop` as long-lived branches.
+
+Regular work uses typed branches such as:
+
+```text
+feat/<scope>/<slug>
+fix/<scope>/<slug>
+docs/<scope>/<slug>
+hotfix/<scope>/<slug>
+release/<version>
+```
+
+An interactive branch wizard creates and validates branches.
+
+## Consequences
+
+- branch intent is visible from its name
+- default base branches are predictable
+- Git hooks can validate branch naming automatically
+- pull requests preserve clear feature boundaries

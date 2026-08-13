@@ -1,0 +1,52 @@
+---
+title: pnpm
+sidebar_position: 1
+---
+
+# pnpm
+
+pnpm is the repository package manager and workspace manager.
+
+The root `package.json` currently declares:
+
+```text
+pnpm@9.0.0
+```
+
+Workspace discovery is configured in `pnpm-workspace.yaml`:
+
+```yaml
+packages:
+  - "apps/*"
+  - "packages/*"
+```
+
+## Install dependencies
+
+```bash
+pnpm install
+```
+
+Run this command from the repository root.
+
+## Filter a workspace
+
+pnpm filters allow commands to target a specific workspace.
+
+Examples:
+
+```bash
+pnpm --filter docs dev
+pnpm --filter docs build
+pnpm --filter @repo/ui test-storybook
+```
+
+## Workspace dependencies
+
+Internal dependencies should use the workspace protocol when appropriate:
+
+```text
+workspace:*
+```
+
+This ensures local workspace packages are linked consistently.
