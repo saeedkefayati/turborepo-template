@@ -1,0 +1,248 @@
+---
+title: "ADR-008: Standardize the Cross-Platform Toolchain"
+sidebar_position: 9
+---
+
+# ADR-008: Standardize the Cross-Platform Toolchain
+
+**Status:** Accepted
+
+## Context
+
+The repository previously declared pnpm 9 at the root and allowed Node.js versions starting from Node 18.
+
+Individual workspaces and development dependencies had newer Node.js requirements.
+
+This created several risks:
+
+- developers could use different Node.js versions
+- developers could use different pnpm versions
+- package-manager behavior could vary between machines
+- lockfile behavior could vary after package-manager upgrades
+- Windows, Linux, and macOS environments could diverge
+- local development and future CI could use different toolchains
+
+The repository requires a reproducible and cross-platform development baseline.
+
+## Decision
+
+Use mise as the repository toolchain manager.
+
+Pin:
+
+```text
+mise >= 2026.8.5
+Node.js 24.19.0 LTS
+pnpm 11.21.0 stable
+```
+
+Use the following project configuration:
+
+```toml
+[tools]
+node = "24.19.0"
+"npm:pnpm" = "11.21.0"
+```
+
+Commit both:
+
+```text
+mise.toml
+mise.lock
+```
+
+Use the root `package.json` as the package-manager and Node compatibility contract:
+
+```json
+{
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  }
+}
+```
+
+Use `pnpm-workspace.yaml` for repository-level pnpm policy.
+
+## pnpm installation backend
+
+pnpm 11 is installed through mise's `npm:pnpm` backend.
+
+The repository continues to use pnpm for all dependency and workspace management.
+
+The npm backend only defines how the pnpm CLI is installed by mise.
+
+This backend was selected to provide one consistent pnpm bootstrap path across the supported Linux, macOS, and Windows environments.
+
+## Supported platform targets
+
+The toolchain targets:
+
+```text
+Linux x64 glibc
+Linux ARM64 glibc
+Linux x64 musl
+Linux ARM64 musl
+macOS ARM64
+Windows x64
+Windows ARM64
+```
+
+Intel macOS is not part of the official forward-looking support matrix.
+
+## pnpm project policy
+
+The repository uses:
+
+```yaml
+pmOnFail: error
+nodeVersion: 24.19.0
+engineStrict: true
+strictDepBuilds: true
+```
+
+The exact Node.js development runtime comes from mise.
+
+The root `engines.node` field defines the supported Node.js compatibility range.
+
+`nodeVersion` defines the Node.js version against which pnpm evaluates dependency engine compatibility.
+
+`engineStrict` prevents incompatible dependency engine requirements from being silently accepted.
+
+`pmOnFail: error` prevents a mismatched pnpm version from silently continuing or downloading another package-manager version.
+
+## Dependency build scripts
+
+Dependency lifecycle scripts are not globally trusted.
+
+Packages that require build scripts must be explicitly reviewed and allowed through `allowBuilds`.
+
+The current allowlist includes:
+
+```text
+@swc/core
+core-js
+esbuild
+lefthook
+```
+
+New dependency build scripts require review before being approved.
+
+## Formatting and line endings
+
+Add:
+
+```text
+.editorconfig
+.gitattributes
+```
+
+`.editorconfig` defines repository-wide editor conventions.
+
+`.gitattributes` normalizes Git text files and line endings across supported operating systems.
+
+## Rejected alternatives
+
+### Multiple Node version managers
+
+Rejected because duplicate project-level version declarations increase configuration drift.
+
+The repository does not maintain simultaneous mise, nvm, fnm, Volta, proto, or asdf configurations.
+
+### Corepack as the package-manager owner
+
+Not selected.
+
+The repository keeps Node.js and pnpm installation under the same mise toolchain manager.
+
+### Native pnpm 11 backend as the universal installation strategy
+
+Not selected for the current baseline.
+
+A native standalone backend provides stronger artifact-specific locking, but pnpm 11 does not provide the same standalone-binary support characteristics across every platform the repository intends to support.
+
+The decision should be revisited when pnpm 12 becomes stable.
+
+### Node.js 26
+
+Deferred.
+
+Node.js 26 is not the repository baseline while it remains a Current release.
+
+The repository prefers an LTS Node.js release for its default development and production toolchain.
+
+Reconsider Node.js 26 after it enters LTS and passes the complete cross-platform validation suite.
+
+### pnpm 12
+
+Deferred.
+
+pnpm 12 is not selected while it remains prerelease software.
+
+After pnpm 12 reaches stable status, evaluate:
+
+- compatibility with the monorepo
+- lockfile migration
+- native pnpm backend support
+- installation performance
+- Windows behavior
+- Linux glibc and musl behavior
+- macOS ARM64 behavior
+- CI results
+
+### pnpr
+
+Deferred.
+
+pnpr is an experimental registry server and installation accelerator from the pnpm ecosystem.
+
+The current repository does not require a private registry, centralized registry credentials, or server-side dependency resolution.
+
+Reconsider pnpr if the project later requires:
+
+- private package hosting
+- an npm registry caching proxy
+- centralized package-registry credentials
+- large CI fleets
+- measurable dependency-resolution latency
+
+## Consequences
+
+Positive consequences:
+
+- exact local Node.js and pnpm versions
+- reproducible tool bootstrap
+- one repository toolchain manager
+- explicit cross-platform support policy
+- stricter dependency engine validation
+- reviewed dependency build scripts
+- predictable Git line endings
+- a future CI matrix can reproduce the same toolchain
+
+Trade-offs:
+
+- contributors must install mise before the repository toolchain can be bootstrapped
+- pnpm 11 is installed through the npm backend rather than a standalone binary
+- musl Node.js artifacts currently rely on Node.js unofficial builds
+- cross-platform support must still be proven continuously through CI
+
+## Upgrade policy
+
+Node.js should follow a supported LTS major.
+
+pnpm should follow a stable release.
+
+Do not move the default repository baseline to alpha, beta, RC, or Node.js Current releases only to obtain newer version numbers.
+
+Major toolchain upgrades require:
+
+1. an accepted stable or LTS release
+2. clean dependency installation
+3. frozen-lockfile validation
+4. formatting validation
+5. lint validation
+6. type checking
+7. application builds
+8. Storybook tests and build
+9. cross-platform CI validation
+10. documentation updates

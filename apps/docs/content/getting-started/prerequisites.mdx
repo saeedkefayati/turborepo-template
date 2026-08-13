@@ -5,57 +5,97 @@ sidebar_position: 1
 
 # Prerequisites
 
-Before working with the repository, make sure the required development tools are available locally.
+The repository uses a project-managed toolchain so that developers do not need to manually coordinate Node.js and pnpm versions.
 
-## Git
+## Required software
 
-Git is required for source control, branch creation, commits, pull requests, and repository history.
+Install the following system-level tools before cloning the repository:
 
-Verify the installation:
+- Git
+- mise
+
+Node.js and pnpm should not be installed manually specifically for this repository.
+
+mise installs the project-required versions from `mise.toml`.
+
+## Toolchain versions
+
+The current project baseline is:
+
+```text
+Node.js 24.19.0 LTS
+pnpm 11.21.0
+mise >= 2026.8.5
+```
+
+The exact versions are controlled by the repository.
+
+## Supported environments
+
+The target development environments are:
+
+```text
+Linux x64 glibc
+Linux ARM64 glibc
+Linux x64 musl
+Linux ARM64 musl
+macOS ARM64
+Windows x64
+Windows ARM64
+```
+
+See the Cross-Platform Support documentation for details.
+
+## Verify Git
 
 ```bash
 git --version
 ```
 
-## Node.js
+## Verify mise
 
-The repository uses modern JavaScript and TypeScript tooling.
+```bash
+mise --version
+```
 
-The Docusaurus application requires Node.js 20 or newer. Other repository tooling may require a newer runtime, so using a current Node.js release is recommended.
+## Do not manually select Node.js or pnpm
 
-Verify the active version:
+Do not use a different Node.js or pnpm version simply because it is already installed globally.
+
+After entering the repository, use:
+
+```bash
+mise install --locked
+```
+
+Then verify:
 
 ```bash
 node --version
-```
-
-## pnpm
-
-The repository uses pnpm workspaces.
-
-The root `package.json` currently pins:
-
-```text
-pnpm@9.0.0
-```
-
-Verify pnpm:
-
-```bash
 pnpm --version
 ```
 
-Use the repository-defined package manager version when possible to keep the lockfile deterministic.
+The expected versions are:
 
-## GitHub CLI
+```text
+v24.19.0
+11.21.0
+```
 
-GitHub CLI is optional for local development but recommended for the repository workflow.
+## Browser testing
 
-It allows pull requests to be created, reviewed, and merged directly from the terminal.
+The UI package uses Playwright Chromium for Storybook browser tests.
 
-Verify it with:
+The required browser can be installed through the UI workspace when needed.
 
 ```bash
-gh --version
-gh auth status
+pnpm --filter @repo/ui exec playwright install chromium
 ```
+
+Some Linux environments may require the operating-system dependencies installed by Playwright.
+
+## Git hooks
+
+Lefthook is installed as a repository development dependency.
+
+After dependencies are installed, Git hooks enforce repository quality gates automatically.

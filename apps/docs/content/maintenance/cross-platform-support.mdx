@@ -1,0 +1,176 @@
+---
+title: Cross-Platform Support
+sidebar_position: 3
+---
+
+# Cross-Platform Support
+
+The repository is designed to use the same development workflow across supported operating systems.
+
+The goal is to avoid operating-system-specific repository scripts and minimize environment drift.
+
+## Target support matrix
+
+The repository targets the following environments:
+
+| Operating system | Architecture | Runtime family | Targeted |
+| ---------------- | ------------ | -------------- | -------- |
+| Linux            | x64          | glibc          | Yes      |
+| Linux            | ARM64        | glibc          | Yes      |
+| Linux            | x64          | musl           | Yes      |
+| Linux            | ARM64        | musl           | Yes      |
+| macOS            | ARM64        | Darwin         | Yes      |
+| Windows          | x64          | Windows        | Yes      |
+| Windows          | ARM64        | Windows        | Yes      |
+
+These entries describe the intended support matrix.
+
+A platform should only be described as fully CI-verified after the remote CI matrix successfully validates it.
+
+## Linux runtime families
+
+Linux support is defined by CPU architecture and C runtime rather than by individual distribution names.
+
+### glibc
+
+Common glibc-based distributions include:
+
+- Ubuntu
+- Debian
+- Linux Mint
+- Pop!\_OS
+- Fedora
+- Red Hat Enterprise Linux
+- CentOS Stream
+- Rocky Linux
+- AlmaLinux
+- Oracle Linux
+- Amazon Linux
+- openSUSE
+- SUSE Linux Enterprise
+- Arch Linux
+- Manjaro
+- Kali Linux
+
+Both x64 and ARM64 are targeted.
+
+### musl
+
+Common musl-based environments include:
+
+- Alpine Linux
+- Void Linux musl edition
+- compatible musl-based container images and distributions
+
+Both x64 and ARM64 are targeted.
+
+`linux-x64-musl` therefore means:
+
+```text
+Linux
++ x86-64 CPU
++ musl libc
+```
+
+`linux-arm64-musl` means:
+
+```text
+Linux
++ ARM64 CPU
++ musl libc
+```
+
+The `musl` suffix is not a different CPU architecture. It identifies the C runtime used by the Linux environment.
+
+## Node.js artifacts on Linux
+
+Standard Linux glibc artifacts are resolved from the official Node.js distribution.
+
+The current mise backend resolves musl-specific Node.js artifacts through the Node.js unofficial-builds distribution.
+
+Those artifacts are pinned by exact version and checksum in `mise.lock`.
+
+This trade-off is accepted to provide fast prebuilt Node.js bootstrap support for musl environments instead of compiling Node.js from source on every machine.
+
+## macOS
+
+The official target is:
+
+```text
+macOS ARM64
+```
+
+This covers Apple Silicon Macs.
+
+Intel macOS is not part of the repository's official forward-looking support matrix.
+
+The repository should not deliberately break Intel macOS compatibility, but CI support and compatibility guarantees are not required for it.
+
+## Windows
+
+The target matrix includes:
+
+```text
+Windows x64
+Windows ARM64
+```
+
+Repository scripts should therefore avoid Unix-only shell commands.
+
+## WSL2
+
+WSL2 follows the Linux support policy.
+
+Its effective support depends on the Linux distribution, CPU architecture, and libc running inside WSL.
+
+## Unsupported architectures
+
+The repository does not currently target:
+
+- x86 32-bit
+- ARMv7
+- ARMHF
+- PowerPC
+- s390x
+- Android or Termux environments
+
+Additional architectures require a deliberate architecture decision and CI validation.
+
+## Cross-platform scripting policy
+
+Repository automation should prefer:
+
+- Node.js scripts
+- pnpm commands
+- Turborepo tasks
+- cross-platform tool CLIs
+
+Avoid embedding operating-system-specific commands in `package.json`, including:
+
+```text
+rm -rf
+cp
+mv
+chmod
+export VARIABLE=value
+bash-only scripts
+PowerShell-only scripts
+```
+
+When filesystem automation is required, prefer a Node.js `.mjs` script using `node:fs`, `node:path`, and other standard Node APIs.
+
+## Line endings
+
+`.editorconfig` defines editor-level text conventions.
+
+`.gitattributes` defines Git-level line-ending and binary-file behavior.
+
+Repository text is normalized to LF, while Windows command files may explicitly use CRLF.
+
+## Dependency binaries
+
+The repository does not configure pnpm to install native optional dependencies for every supported architecture on every developer machine.
+
+A developer should install only the native dependencies required by the current host platform.
+
+Cross-platform compatibility is validated by running the repository on separate CI environments rather than installing every operating-system binary everywhere.

@@ -5,43 +5,93 @@ sidebar_position: 1
 
 # Dependency Management
 
-Dependency changes should be intentional and isolated from unrelated feature work.
+Dependencies are managed with pnpm workspaces.
 
-## Install dependencies
+## General rules
+
+Install dependencies in the smallest workspace that requires them.
+
+Do not add application-specific dependencies to the repository root.
+
+Use the root workspace for repository-wide development tooling.
+
+Examples:
+
+```bash
+pnpm --filter web add <package>
+pnpm --filter docs add <package>
+pnpm --filter @repo/ui add <package>
+pnpm add -Dw <repository-tool>
+```
+
+## Lockfile
+
+`pnpm-lock.yaml` is committed and must remain reproducible.
+
+Normal bootstrap uses:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+A non-frozen install is appropriate when intentionally changing dependencies or migrating pnpm.
 
 ```bash
 pnpm install
 ```
 
-The root `pnpm-lock.yaml` represents the dependency graph for the entire workspace.
+After the change, run the frozen installation again to confirm reproducibility.
 
-## Updating dependencies
+## Dependency build scripts
 
-Before upgrading packages:
+Dependency lifecycle scripts are considered privileged behavior.
 
-1. review the relevant changelog
-2. identify runtime and peer-dependency requirements
-3. update the smallest reasonable dependency scope
-4. run the complete repository validation suite
-5. review the lockfile diff before committing
+pnpm is configured to reject unreviewed dependency builds.
 
-## Toolchain migrations
+When pnpm reports an ignored or unapproved build script:
 
-Large toolchain changes should use dedicated branches and commits.
+1. identify the dependency
+2. determine why its build script is required
+3. review whether the package is trusted
+4. approve only the required package
+5. commit the resulting workspace policy
 
-Examples include:
+Do not globally enable all dependency scripts.
 
-- Node.js requirement changes
-- pnpm major upgrades
-- TypeScript major upgrades
-- Storybook upgrades
-- Next.js upgrades
-- Docusaurus upgrades
+## Node.js compatibility
 
-Avoid combining these migrations with unrelated product or documentation work.
+The repository uses a pinned Node.js development runtime and strict dependency engine checking.
 
-## Security
+Dependencies must remain compatible with the Node.js target declared in `pnpm-workspace.yaml`.
 
-Dependency security findings should be reviewed through GitHub dependency tooling and addressed in dedicated security or dependency maintenance work.
+## Toolchain upgrades
 
-Do not hardcode vulnerability counts in long-lived documentation because those values change over time.
+Node.js and pnpm upgrades are repository-level migrations.
+
+Do not update them casually as part of an unrelated feature branch.
+
+A toolchain upgrade requires:
+
+- `mise.toml` update
+- `mise.lock` regeneration
+- package metadata update
+- workspace policy update when applicable
+- clean installation
+- full repository validation
+- cross-platform CI validation
+- documentation update
+
+## Major-version policy
+
+The default repository baseline prefers:
+
+```text
+Node.js LTS releases
+pnpm stable releases
+```
+
+Do not move the default toolchain to alpha, beta, RC, or Node.js Current releases solely because they are newer.
+
+Node.js 26 should be reconsidered after it reaches LTS.
+
+pnpm 12 should be reconsidered after it reaches stable status.
