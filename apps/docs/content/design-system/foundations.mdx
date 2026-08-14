@@ -5,7 +5,8 @@ sidebar_position: 1
 
 # Design Foundations
 
-The shared UI package contains reusable design foundations that establish consistent visual behavior across components.
+The shared UI package contains reusable design foundations that establish
+consistent visual and interaction behavior across components.
 
 Current foundation areas include:
 
@@ -15,7 +16,115 @@ Current foundation areas include:
 - border radius
 - shadows
 - motion
+- accessibility
+- internationalization
 
 Each foundation is documented and previewed through Storybook.
 
-Foundations should remain independent of individual product screens and should expose reusable design decisions that can be consumed consistently across applications.
+Foundations remain independent of individual product screens and expose
+reusable design decisions that can be consumed consistently across
+applications.
+
+## Semantic design tokens
+
+The design system separates reusable semantic decisions from product-specific
+implementation details.
+
+Semantic tokens cover areas such as:
+
+```text
+background and foreground
+surfaces
+borders
+focus
+primary actions
+danger states
+spacing
+radius
+shadows
+motion
+typography
+```
+
+Components consume semantic tokens instead of embedding application-specific
+colors or values.
+
+## Theme contract
+
+The shared design system supports resolved light and dark themes through:
+
+```text
+data-theme="light"
+data-theme="dark"
+```
+
+The design system owns the semantic values associated with those resolved
+themes.
+
+Applications remain responsible for:
+
+- choosing the user's theme preference
+- resolving system preference
+- persistence
+- applying the resolved theme to the document
+
+Components do not contain theme hooks or preference-management logic.
+
+## Direction and internationalization
+
+HTML direction is the source of truth.
+
+Components inherit direction by default and use logical CSS properties such as:
+
+```text
+start
+end
+ps
+pe
+ms
+me
+text-start
+```
+
+instead of semantic left/right assumptions.
+
+Applications remain responsible for:
+
+- locale selection
+- locale routing
+- translation loading
+- root `lang`
+- root `dir`
+- locale detection
+- application-specific formatting
+
+The design system remains locale-agnostic and provides reusable behavior that
+works across writing systems.
+
+Storybook includes representative scripts and mixed-direction scenarios for
+internationalization QA.
+
+## Typography
+
+Typography uses semantic roles rather than binding components to a specific
+application font.
+
+Applications are responsible for loading the actual font families used for
+body, display, and code typography.
+
+## Motion
+
+Motion tokens provide shared timing and easing values.
+
+Reduced-motion preferences are respected at the foundation level so components
+do not need independent motion-preference hooks.
+
+## Accessibility
+
+Accessibility is treated as a design-system foundation rather than an
+individual component feature.
+
+Components target accessible native semantics, visible focus states, usable
+control states, and WCAG-oriented contrast behavior.
+
+Automated Storybook accessibility checks are supplemented by manual QA.
