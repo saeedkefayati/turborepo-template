@@ -1,33 +1,52 @@
-import { type ReactNode, useEffect } from "react";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
 
-import { withThemeByDataAttribute } from "@storybook/addon-themes";
-import type { Preview, ReactRenderer } from "@storybook/react-vite";
+import type { Preview } from "@storybook/react-vite";
 
 import "../src/styles/index.css";
 import "./preview.css";
 
 type Direction = "ltr" | "rtl";
+type ThemeMode = "system" | "light" | "dark";
+type ResolvedTheme = Exclude<ThemeMode, "system">;
 
 type StoryEnvironmentProps = {
   children: ReactNode;
   direction: Direction;
+  themeMode: ThemeMode;
 };
 
-function StoryEnvironment({ children, direction }: StoryEnvironmentProps) {
+function resolveSystemTheme(mediaQuery: MediaQueryList): ResolvedTheme {
+  return mediaQuery.matches ? "dark" : "light";
+}
+
+function StoryEnvironment({ children, direction, themeMode }: StoryEnvironmentProps) {
+  useEffect(() => {
+    document.documentElement.setAttribute("dir", direction);
+  }, [direction]);
+
   useEffect(() => {
     const root = document.documentElement;
-    const previousDir = root.getAttribute("dir");
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-    root.setAttribute("dir", direction);
+    const applyTheme = () => {
+      const resolvedTheme = themeMode === "system" ? resolveSystemTheme(mediaQuery) : themeMode;
+
+      root.setAttribute("data-theme", resolvedTheme);
+    };
+
+    applyTheme();
+
+    if (themeMode !== "system") {
+      return;
+    }
+
+    mediaQuery.addEventListener("change", applyTheme);
 
     return () => {
-      if (previousDir) {
-        root.setAttribute("dir", previousDir);
-      } else {
-        root.removeAttribute("dir");
-      }
+      mediaQuery.removeEventListener("change", applyTheme);
     };
-  }, [direction]);
+  }, [themeMode]);
 
   return (
     <div dir={direction} className="contents">
@@ -38,43 +57,31 @@ function StoryEnvironment({ children, direction }: StoryEnvironmentProps) {
 
 const preview: Preview = {
   globalTypes: {
+    themeMode: {
+      description: "Theme preference",
+    },
+
     direction: {
       description: "Writing direction",
-      toolbar: {
-        items: [
-          {
-            value: "ltr",
-            title: "LTR",
-          },
-          {
-            value: "rtl",
-            title: "RTL",
-          },
-        ],
-        dynamicTitle: true,
-      },
     },
   },
 
   initialGlobals: {
+    themeMode: "dark",
     direction: "ltr",
   },
 
   decorators: [
-    withThemeByDataAttribute<ReactRenderer>({
-      themes: {
-        light: "light",
-        dark: "dark",
-      },
-      defaultTheme: "dark",
-      attributeName: "data-theme",
-    }),
-
     (Story, context) => {
+      const themeMode: ThemeMode =
+        context.globals.themeMode === "system" || context.globals.themeMode === "light"
+          ? context.globals.themeMode
+          : "dark";
+
       const direction: Direction = context.globals.direction === "rtl" ? "rtl" : "ltr";
 
       return (
-        <StoryEnvironment direction={direction}>
+        <StoryEnvironment themeMode={themeMode} direction={direction}>
           <Story />
         </StoryEnvironment>
       );
