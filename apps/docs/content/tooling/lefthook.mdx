@@ -22,9 +22,13 @@ The pre-commit pipeline validates:
 - staged MDX formatting and validation with Remark
 - staged JavaScript and TypeScript linting with ESLint
 - repository type checking
-- UI Storybook tests when matching UI files are staged
+- the UI `test` task when matching UI files are staged
 
-Files automatically fixed by Prettier, Remark, or ESLint are staged again by Lefthook.
+Files automatically fixed by Prettier, Remark, or ESLint are staged again by
+Lefthook.
+
+The UI test remains targeted during pre-commit so unrelated commits do not run
+browser tests unnecessarily.
 
 ## Commit message
 
@@ -32,20 +36,44 @@ The `commit-msg` hook runs Commitlint against the final commit message.
 
 ## Pre-push
 
-The pre-push pipeline performs broader validation:
+The pre-push pipeline performs broader validation through the repository quality
+contract:
 
-- branch policy
-- repository formatting
-- MDX validation
-- linting
-- type checking
-- UI Storybook tests
-- Storybook production build
+```text
+branch policy
+format check
+lint
+type checking
+tests
+builds
+```
 
-The root formatting check already includes Remark validation, so MDX does not require a duplicate pre-push job.
+The independent quality jobs run in parallel.
+
+The root build contract includes the Storybook production build.
+
+The root formatting check already includes Remark validation, so MDX does not
+require a duplicate pre-push job.
+
+## Relationship to pnpm verify
+
+Developers can run:
+
+```bash
+pnpm verify
+```
+
+for one complete sequential local validation pass.
+
+Lefthook does not replace its parallel pre-push jobs with `pnpm verify` because
+parallel execution provides faster Git workflow feedback.
 
 ## Important limitation
 
 Local hooks are not a substitute for remote CI.
 
-Local hooks can be bypassed, so critical repository enforcement should eventually also exist in GitHub Actions and branch protection rules.
+Local hooks can be bypassed, so critical repository enforcement also exists in
+GitHub Actions.
+
+Branch protection remains the final follow-up required to make `CI Gate` a merge
+condition.

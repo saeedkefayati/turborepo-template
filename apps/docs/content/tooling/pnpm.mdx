@@ -179,3 +179,144 @@ It may be reconsidered if the project later requires:
 - large-scale CI dependency acceleration
 
 The current repository uses the standard pnpm registry workflow.
+
+## Dependency catalogs
+
+Shared external dependency versions are managed with the pnpm default catalog.
+
+The architectural decision is documented in
+[ADR-012](../decisions/adr-012-pnpm-dependency-catalogs.mdx).
+
+The catalog is defined in:
+
+```text
+pnpm-workspace.yaml
+```
+
+The current shared catalog contains repository-wide baselines for:
+
+```text
+@types/node
+@types/react
+@types/react-dom
+clsx
+eslint
+globals
+react
+react-dom
+typescript
+```
+
+Consumer packages continue to declare their own dependencies:
+
+```json
+{
+  "devDependencies": {
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}
+```
+
+This separates two concerns:
+
+```text
+dependency ownership
+→ package.json of the consumer
+
+shared version policy
+→ pnpm-workspace.yaml catalog
+```
+
+### Catalog versus workspace protocol
+
+Use:
+
+```text
+workspace:*
+```
+
+for packages implemented inside this repository, such as:
+
+```text
+@repo/ui
+@repo/eslint-config
+@repo/typescript-config
+```
+
+Use:
+
+```text
+catalog:
+```
+
+for shared external dependencies whose version is intentionally synchronized
+across multiple consumers.
+
+Do not use `workspace:*` for registry packages such as ESLint or React.
+
+### Adding shared dependencies
+
+When a new external dependency becomes intentionally shared across multiple
+workspaces:
+
+1. add its accepted range to the default catalog
+2. change its consumer declarations to `catalog:`
+3. run `pnpm install`
+4. run the full repository validation
+5. document the policy if the dependency changes repository architecture
+
+pnpm also supports saving dependencies into a catalog through its catalog-aware
+add options.
+
+### Adding package-local dependencies
+
+A dependency used by only one workspace should normally keep a direct version
+specifier:
+
+```bash
+pnpm --filter <workspace> add <package>
+```
+
+Do not move a dependency into the catalog only to eliminate a version string.
+
+### Catalog mode
+
+The repository currently uses:
+
+```yaml
+catalogMode: prefer
+```
+
+Existing compatible catalog entries are preferred when adding dependencies.
+
+This gives shared dependencies a stable default without forcing unrelated
+package-local dependencies into the catalog.
+
+### Intentional multiple versions
+
+If a future migration requires multiple versions of the same dependency, use
+named catalogs rather than allowing consumer manifests to drift silently.
+
+For example:
+
+```yaml
+catalogs:
+  react20:
+    react: ^20.0.0
+    react-dom: ^20.0.0
+```
+
+A selected consumer can then use:
+
+```json
+{
+  "dependencies": {
+    "react": "catalog:react20",
+    "react-dom": "catalog:react20"
+  }
+}
+```
+
+Named catalogs should represent an intentional compatibility or migration
+boundary, not accidental dependency divergence.

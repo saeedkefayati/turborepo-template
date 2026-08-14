@@ -2,13 +2,15 @@
   "name": "my-turborepo",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build build-storybook",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write . && pnpm --filter docs format:mdx",
     "format:check": "prettier --check . && pnpm --filter docs check:mdx",
     "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "verify": "pnpm format:check && pnpm lint && pnpm check-types && pnpm test && pnpm build",
     "commit": "git-cz",
     "branch": "node scripts/git/branch.mjs",
     "branch:validate": "node scripts/git/validate-branch.mjs"
@@ -19,12 +21,13 @@
     "@inquirer/prompts": "^8.5.2",
     "commitizen": "^4.3.2",
     "cz-git": "^1.13.2",
-    "globals": "^16.5.0",
+    "eslint": "catalog:",
+    "globals": "catalog:",
     "lefthook": "^2.1.10",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "turbo": "^2.10.9",
-    "typescript": "5.9.2"
+    "typescript": "catalog:"
   },
   "packageManager": "pnpm@11.21.0",
   "engines": {

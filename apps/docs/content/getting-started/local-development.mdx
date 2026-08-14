@@ -5,7 +5,8 @@ sidebar_position: 3
 
 # Local Development
 
-The repository uses pnpm workspaces and Turborepo to coordinate applications and shared packages.
+The repository uses pnpm workspaces and Turborepo to coordinate applications and
+shared packages.
 
 mise provides the Node.js and pnpm toolchain.
 
@@ -45,19 +46,27 @@ pnpm --filter @repo/ui dev
 
 ## Daily workflow
 
-Once the repository toolchain has been installed, normal development uses pnpm directly.
+Once the repository toolchain has been installed, normal development uses pnpm
+directly.
 
 ```bash
 pnpm dev
 pnpm format
 pnpm lint
 pnpm check-types
+pnpm test
 pnpm build
+```
+
+For one complete validation pass:
+
+```bash
+pnpm verify
 ```
 
 mise does not replace these commands.
 
-Use mise when bootstrapping or updating the project toolchain.
+Use mise when bootstrapping or updating the project toolchain:
 
 ```bash
 mise install --locked
@@ -107,22 +116,23 @@ Do not manually edit `pnpm-lock.yaml`.
 
 ## Validation
 
-Before a substantial commit, run:
+Before pushing substantial changes, run:
 
 ```bash
-pnpm format:check
-pnpm lint
-pnpm check-types
-pnpm build
+pnpm verify
+git diff --check
 ```
 
-UI work should additionally validate:
+The repository contracts mean that UI validation does not require separate
+Storybook-specific commands.
+
+For targeted UI work, the corresponding workspace commands remain available:
 
 ```bash
-pnpm --filter @repo/ui test-storybook
+pnpm --filter @repo/ui test
 pnpm --filter @repo/ui build-storybook
 ```
 
 Git hooks provide additional local validation.
 
-Future remote CI is expected to reproduce the critical repository quality gates on supported operating systems.
+GitHub Actions independently reproduces the critical quality gates remotely.

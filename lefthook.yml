@@ -38,7 +38,7 @@ pre-commit:
                 - name: ui-tests
                   glob:
                     - "packages/ui/**/*.{ts,tsx,css,json}"
-                  run: pnpm --filter @repo/ui test-storybook
+                  run: pnpm --filter @repo/ui test
 
 commit-msg:
   jobs:
@@ -64,8 +64,8 @@ pre-push:
           - name: types
             run: pnpm check-types
 
-          - name: ui-tests
-            run: pnpm --filter @repo/ui test-storybook
+          - name: tests
+            run: pnpm test
 
-          - name: storybook-build
-            run: pnpm --filter @repo/ui build-storybook
+          - name: build
+            run: pnpm build

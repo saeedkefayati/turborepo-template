@@ -95,3 +95,84 @@ Do not move the default toolchain to alpha, beta, RC, or Node.js Current release
 Node.js 26 should be reconsidered after it reaches LTS.
 
 pnpm 12 should be reconsidered after it reaches stable status.
+
+## Shared dependency ownership
+
+Dependency declarations follow three ownership patterns.
+
+| Dependency type                   | Version/reference policy                      |
+| --------------------------------- | --------------------------------------------- |
+| Internal repository package       | `workspace:*`                                 |
+| Shared external dependency        | `catalog:`                                    |
+| Package-local external dependency | direct semver or intentional distribution tag |
+
+### Internal packages
+
+Repository-owned packages are linked explicitly with the workspace protocol.
+
+Examples:
+
+```text
+@repo/ui
+@repo/eslint-config
+@repo/typescript-config
+```
+
+This guarantees that consumers resolve the local workspace implementation.
+
+### Shared external packages
+
+External dependencies directly used by multiple consumers and expected to share
+one baseline use the pnpm catalog.
+
+Examples currently include:
+
+```text
+eslint
+typescript
+react
+react-dom
+@types/react
+@types/react-dom
+@types/node
+clsx
+globals
+```
+
+The consumer still owns the dependency declaration, while
+`pnpm-workspace.yaml` owns the version range.
+
+### Package-local dependencies
+
+Dependencies that belong to one implementation remain directly versioned in
+that package.
+
+Examples can include framework-specific, testing-specific, documentation, or
+build dependencies that have no repository-wide shared-version requirement.
+
+This avoids turning the catalog into a second lockfile or a list of every
+dependency in the monorepo.
+
+## Updating a catalog-managed dependency
+
+For a normal shared upgrade:
+
+1. update the version range in `pnpm-workspace.yaml`
+2. run `pnpm install`
+3. inspect the lockfile change
+4. run `pnpm verify`
+5. run cross-platform CI before merging architecture-sensitive upgrades
+
+Consumer `package.json` files normally remain unchanged because they reference
+`catalog:`.
+
+## Intentional version divergence
+
+Different versions of the same dependency must be an explicit architectural
+choice.
+
+When a gradual migration requires separate version lanes, use pnpm named
+catalogs.
+
+Do not replace `catalog:` with ad hoc direct ranges in individual workspaces
+without documenting why the repository requires that divergence.

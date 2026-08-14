@@ -9,13 +9,12 @@
   },
   "scripts": {
     "dev": "storybook dev -p 6006 --exact-port --no-open",
+    "build-storybook": "storybook build",
+    "test": "vitest run --project=storybook",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit",
-    "storybook": "storybook dev -p 6006 --exact-port",
-    "build-storybook": "storybook build",
-    "test-storybook": "vitest run --project=storybook"
+    "generate:component": "turbo gen react-component"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "latest",
@@ -28,25 +27,25 @@
     "@storybook/addon-vitest": "^10.5.7",
     "@storybook/react-vite": "^10.5.7",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^22.15.3",
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@vitest/browser-playwright": "latest",
     "@vitest/coverage-v8": "latest",
-    "eslint": "^9.39.1",
+    "eslint": "catalog:",
     "eslint-plugin-storybook": "^10.5.7",
     "playwright": "latest",
     "storybook": "^10.5.7",
     "tailwindcss": "^4.3.3",
-    "typescript": "5.9.2",
+    "typescript": "catalog:",
     "vite": "^8.2.1",
     "vitest": "latest"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "clsx": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "tailwind-merge": "^3.6.0"
   }
 }
