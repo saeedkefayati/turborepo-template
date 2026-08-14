@@ -16,18 +16,16 @@ export const switchVariants = cva(
     "peer-aria-invalid:ring-danger",
     "[&>span]:absolute [&>span]:start-0.5",
     "[&>span]:rounded-full [&>span]:bg-muted-foreground",
-    "[&>span]:transition-transform [&>span]:duration-fast",
-    "[&>span]:ease-standard",
+    "[&>span]:transition-[inset-inline-start]",
+    "[&>span]:duration-fast [&>span]:ease-standard",
     "peer-checked:[&>span]:bg-primary-foreground",
-    "peer-checked:[&>span]:translate-x-full",
-    "rtl:peer-checked:[&>span]:-translate-x-full",
   ],
   {
     variants: {
       controlSize: {
-        sm: "h-4 w-7 [&>span]:size-3",
-        md: "h-5 w-9 [&>span]:size-4",
-        lg: "h-6 w-11 [&>span]:size-5",
+        sm: ["h-4 w-7 [&>span]:size-3", "peer-checked:[&>span]:start-[0.875rem]"],
+        md: ["h-5 w-9 [&>span]:size-4", "peer-checked:[&>span]:start-[1.125rem]"],
+        lg: ["h-6 w-11 [&>span]:size-5", "peer-checked:[&>span]:start-[1.375rem]"],
       },
     },
 

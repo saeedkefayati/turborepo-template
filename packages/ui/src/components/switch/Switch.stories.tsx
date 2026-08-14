@@ -174,13 +174,13 @@ export const BidirectionalLabels: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <label dir="ltr" className="flex items-center gap-3">
-        <Switch defaultChecked />
+        <Switch dir="ltr" defaultChecked />
 
         <span className="text-body-sm text-foreground">Email notifications</span>
       </label>
 
       <label dir="rtl" className="flex items-center gap-3">
-        <Switch defaultChecked />
+        <Switch dir="rtl" defaultChecked />
 
         <span className="text-body-sm text-foreground">اعلان‌های ایمیلی</span>
       </label>
@@ -188,16 +188,23 @@ export const BidirectionalLabels: Story = {
   ),
 
   play: async ({ canvas }) => {
-    await expect(
-      canvas.getByRole("switch", {
-        name: "Email notifications",
-      }),
-    ).toBeChecked();
+    const english = canvas.getByRole("switch", {
+      name: "Email notifications",
+    });
 
-    await expect(
-      canvas.getByRole("switch", {
-        name: "اعلان‌های ایمیلی",
-      }),
-    ).toBeChecked();
+    const persian = canvas.getByRole("switch", {
+      name: "اعلان‌های ایمیلی",
+    });
+
+    await expect(english).toBeChecked();
+    await expect(persian).toBeChecked();
+
+    await expect(english).toHaveAttribute("dir", "ltr");
+
+    await expect(persian).toHaveAttribute("dir", "rtl");
+
+    await expect(english.parentElement).toHaveAttribute("dir", "ltr");
+
+    await expect(persian.parentElement).toHaveAttribute("dir", "rtl");
   },
 };
