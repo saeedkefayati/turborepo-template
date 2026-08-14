@@ -151,5 +151,23 @@ The stable aggregation check is:
 CI Gate
 ```
 
-Branch protection remains responsible for turning that remote result into a
-required merge condition.
+`CI Gate` is the canonical remote merge signal consumed by branch protection.
+
+Individual CI jobs may run conditionally based on the files or platform tiers
+affected by a change. A conditionally skipped job is not considered a failure
+when that job is intentionally outside the current execution tier.
+
+A pull request should not be merged until required checks have completed
+successfully and `CI Gate` reports success.
+
+The current pull request workflow can wait for remote validation with:
+
+```bash
+gh pr checks <branch> \
+  --watch \
+  --interval 10 \
+  --fail-fast
+```
+
+Branch protection remains responsible for enforcing the required remote merge
+condition.
