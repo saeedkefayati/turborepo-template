@@ -67,11 +67,8 @@ jobs:
       - name: Install Chromium
         run: pnpm --filter @repo/ui exec playwright install --with-deps chromium
 
-      - name: Run Storybook tests
-        run: pnpm --filter @repo/ui test-storybook
-
-      - name: Build Storybook
-        run: pnpm --filter @repo/ui build-storybook
+      - name: Run tests
+        run: pnpm test
 
   native:
     name: Native / ${{ matrix.name }}
@@ -204,11 +201,8 @@ jobs:
       - name: Install Chromium
         run: pnpm --filter @repo/ui exec playwright install --with-deps chromium
 
-      - name: Run Storybook tests
-        run: pnpm --filter @repo/ui test-storybook
-
-      - name: Build Storybook
-        run: pnpm --filter @repo/ui build-storybook
+      - name: Run tests
+        run: pnpm test
 
   ci-gate:
     name: CI Gate

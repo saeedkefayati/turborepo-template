@@ -7,14 +7,29 @@ sidebar_position: 4
 
 The UI package integrates Storybook with Vitest browser testing.
 
-Run the Storybook test suite with:
+The repository-wide test contract is:
 
 ```bash
-pnpm --filter @repo/ui test-storybook
+pnpm test
 ```
 
-Story interactions are used to validate component behavior in a browser environment.
+The current implementation discovers the UI test task and runs Storybook tests
+with Vitest, Playwright, and Chromium.
 
-The pre-push quality gate runs the UI test suite together with the Storybook production build.
+For targeted UI development, run:
 
-Testing should focus on externally observable component behavior rather than internal implementation details.
+```bash
+pnpm --filter @repo/ui test
+```
+
+Story interactions validate externally observable component behavior in a real
+browser environment.
+
+The pre-commit hook conditionally runs the targeted UI test task when matching
+UI files are staged.
+
+The pre-push and remote CI layers consume the repository-wide `pnpm test`
+contract.
+
+Future workspace test suites can participate by defining their own `test` task
+without changing the root command.

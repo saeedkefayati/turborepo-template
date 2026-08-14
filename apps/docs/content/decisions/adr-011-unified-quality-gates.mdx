@@ -1,0 +1,414 @@
+---
+title: "ADR-011: Unified Repository Quality Gates"
+description: "Define a stable repository-wide quality contract while preserving workspace-owned task semantics."
+---
+
+# ADR-011: Unified Repository Quality Gates
+
+## Status
+
+Accepted
+
+## Date
+
+2026-08-14
+
+## Context
+
+The repository originally exposed common root commands for:
+
+```text
+build
+lint
+check-types
+```
+
+but testing and Storybook validation were invoked through UI-specific commands:
+
+```text
+test-storybook
+build-storybook
+```
+
+As a result, local hooks and GitHub Actions needed to know implementation
+details of the `@repo/ui` package.
+
+The repository also needs a clear distinction between:
+
+- repository-owned operations
+- workspace-owned tasks
+- shared configuration and policy
+- implementation-specific tasks
+
+The goal is not to remove every repeated script string.
+
+The goal is to provide a stable repository contract while keeping task ownership
+and dependency-graph semantics correct.
+
+## Decision
+
+Adopt a unified repository quality contract.
+
+The primary developer-facing commands are:
+
+```bash
+pnpm dev
+pnpm build
+pnpm test
+pnpm lint
+pnpm lint:fix
+pnpm check-types
+pnpm format
+pnpm format:check
+pnpm verify
+```
+
+## Workspace-owned tasks
+
+Tasks whose implementation belongs to an application or package remain defined
+inside that workspace.
+
+The common workspace task vocabulary is:
+
+```text
+dev
+build
+test
+lint
+lint:fix
+check-types
+```
+
+A workspace defines only the tasks it actually implements.
+
+For example, the repository currently has UI browser tests but does not add
+placeholder `test` scripts to workspaces that do not yet contain tests.
+
+Turborepo discovers and orchestrates participating workspace tasks.
+
+## Build contract
+
+The public repository build command is:
+
+```bash
+pnpm build
+```
+
+It delegates to:
+
+```bash
+turbo run build build-storybook
+```
+
+The current internal task implementations are:
+
+```text
+web#build
+→ Next.js production build
+
+docs#build
+→ Docusaurus production build
+
+@repo/ui#build-storybook
+→ Storybook static production build
+```
+
+Storybook intentionally retains the internal task name:
+
+```text
+build-storybook
+```
+
+rather than masquerading as `@repo/ui#build`.
+
+The UI package currently exports source modules directly and does not produce a
+library build artifact required by downstream workspace builds.
+
+Keeping Storybook separate preserves the meaning of the normal Turborepo
+`build` dependency graph while the root `pnpm build` still provides one
+developer-facing command for all repository build artifacts.
+
+The corresponding cached output is:
+
+```text
+storybook-static/**
+```
+
+## Test contract
+
+The public repository test command is:
+
+```bash
+pnpm test
+```
+
+It delegates to:
+
+```bash
+turbo run test
+```
+
+Every workspace that defines a real `test` task automatically participates.
+
+The UI implementation currently runs:
+
+```text
+Vitest
++
+Storybook test integration
++
+Playwright
++
+Chromium
+```
+
+No Storybook-specific test alias is exposed as part of the repository contract.
+
+If Web, Docs, or future workspaces add tests, the root `pnpm test` command does
+not need to change.
+
+## Test caching
+
+The current Turbo test task uses:
+
+```text
+cache: false
+```
+
+Browser tests are currently fast enough that the repository prefers executing
+them for every quality-gate invocation rather than accepting a cached result.
+
+This decision can be reevaluated when remote caching or a substantially larger
+test suite is introduced.
+
+## Linting and type checking
+
+Lint and type-check execution remain workspace-owned:
+
+```text
+web
+docs
+ui
+```
+
+while their reusable policy is shared.
+
+The distinction is:
+
+```text
+ESLint policy
+→ shared ESLint configuration
+
+ESLint execution
+→ workspace lint task
+
+TypeScript policy
+→ shared TypeScript configuration
+
+TypeScript execution
+→ workspace check-types task
+```
+
+Repeated workspace script names are therefore part of the task contract rather
+than unwanted duplication.
+
+## Formatting
+
+Formatting remains repository-owned.
+
+The root formatter covers repository-wide files that do not belong to one
+workspace, including configuration, automation, and root metadata.
+
+The current formatting contract is:
+
+```text
+Prettier
+→ regular repository files
+
+Remark
+→ Docusaurus MDX content
+```
+
+Docusaurus MDX is excluded from Prettier and delegated to the Docs workspace
+because Remark owns that content.
+
+Formatting is therefore not converted into duplicated workspace-level
+`format` tasks merely for symmetry with other Turbo tasks.
+
+If the repository later adopts genuinely different formatters for different
+workspace technologies, this decision can be revisited.
+
+## Full local verification
+
+The repository exposes:
+
+```bash
+pnpm verify
+```
+
+as a developer-facing complete validation command.
+
+It composes the public quality commands:
+
+```text
+format:check
+lint
+check-types
+test
+build
+```
+
+This provides one predictable local verification entry point without exposing
+the implementation details of Storybook, Next.js, Docusaurus, Vitest, or
+Playwright.
+
+## Lefthook
+
+Pre-commit retains targeted validation where it improves local feedback.
+
+For example, UI browser tests run conditionally when matching UI files are
+staged.
+
+Pre-push uses the repository quality contract:
+
+```text
+format:check
+lint
+check-types
+test
+build
+```
+
+Independent pre-push jobs remain parallelized by Lefthook instead of replacing
+the hook with the sequential `pnpm verify` convenience command.
+
+## GitHub Actions
+
+GitHub Actions also consumes the repository-owned commands rather than
+duplicating implementation details.
+
+Fast CI runs:
+
+```text
+format:check
+lint
+check-types
+build
+Chromium installation
+test
+```
+
+The native Full CI matrix runs:
+
+```text
+format:check
+lint
+check-types
+build
+```
+
+Because the public build contract includes the Storybook production artifact,
+Storybook production builds are validated through `pnpm build`.
+
+The dedicated browser job installs Chromium and runs:
+
+```bash
+pnpm test
+```
+
+Browser installation remains environment-specific infrastructure rather than a
+repository script concern.
+
+## Consequences
+
+### Positive
+
+- developers have a small and predictable repository command surface
+- adding tests to future workspaces does not require changing the root test command
+- build artifacts are available through one root command
+- Storybook keeps correct internal task semantics
+- Lefthook and GitHub Actions depend on repository contracts instead of UI-specific aliases
+- shared tooling policy is separated from workspace execution
+- formatting continues to cover root and automation files correctly
+- the architecture can grow without introducing placeholder scripts
+
+### Negative
+
+- the root build command internally aggregates two Turbo task names
+- Storybook production builds execute as part of the repository build contract
+- browser tests intentionally bypass Turbo task caching
+- formatting is not symmetrical with workspace-owned Turbo tasks
+
+These tradeoffs are intentional and reflect task ownership rather than visual
+uniformity.
+
+## Alternatives considered
+
+### Make `@repo/ui#build` run Storybook
+
+Rejected.
+
+Storybook is not currently the library build artifact consumed by dependent
+workspaces.
+
+Using `build` for Storybook would blur the meaning of the normal Turbo build
+dependency graph.
+
+### Keep separate public Storybook commands
+
+Rejected.
+
+Commands such as:
+
+```text
+test-storybook
+build-storybook
+```
+
+forced Lefthook, CI, and developers to know implementation details that should
+remain inside the UI workspace.
+
+The internal `build-storybook` task remains because it represents a real
+specialized build operation.
+
+### Add format scripts to every workspace
+
+Rejected.
+
+Prettier currently operates across the repository, including root files and
+automation configuration.
+
+Duplicating the same formatting command across workspaces would not improve task
+ownership.
+
+### Add placeholder test scripts to every workspace
+
+Rejected.
+
+A workspace should expose a task only when it has an implementation worth
+executing.
+
+## Relationship to earlier ADRs
+
+ADR-001 remains authoritative for the use of Turborepo.
+
+ADR-006 remains authoritative for the use of Storybook.
+
+ADR-007 remains authoritative for Remark ownership of Docusaurus MDX.
+
+ADR-009 remains authoritative for the GitHub Actions provider, security model,
+platform matrix, and original CI architecture.
+
+ADR-010 remains authoritative for Fast CI versus Full CI selection and trigger
+policy.
+
+This ADR supersedes earlier documentation only for the repository quality
+command contract and the way local and remote validation invoke those commands.
+
+## Follow-up work
+
+1. configure branch protection around the stable `CI Gate`
+2. add Web and Docs tests when their behavior requires dedicated test suites
+3. reevaluate test caching when Turborepo remote caching is introduced
+4. add dedicated Linux musl validation
+5. continue dependency and security remediation

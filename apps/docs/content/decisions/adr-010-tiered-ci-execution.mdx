@@ -312,12 +312,22 @@ timeouts
 musl support policy
 ```
 
+## Relationship to ADR-011
+
+ADR-011 standardizes the repository quality-command contract used by local
+hooks and GitHub Actions.
+
+This does not change the Fast CI versus Full CI selection policy defined by this
+ADR.
+
+The CI tiers continue to use the same trigger and platform strategy while
+consuming the unified repository commands.
+
 ## Follow-up work
 
 After this policy is verified remotely:
 
 1. configure branch protection around `CI Gate`
-2. consolidate repository-owned test and quality commands
-3. add dedicated Linux musl validation
-4. reevaluate Windows ARM64 enforcement when runner maturity permits it
-5. continue dependency and security remediation
+2. add dedicated Linux musl validation
+3. reevaluate Windows ARM64 enforcement when runner maturity permits it
+4. continue dependency and security remediation

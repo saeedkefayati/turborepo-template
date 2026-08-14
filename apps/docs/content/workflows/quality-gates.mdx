@@ -5,21 +5,55 @@ sidebar_position: 4
 
 # Quality Gates
 
-Repository quality is enforced through local scripts, Turborepo tasks, formatters, linters, and Lefthook Git hooks.
+Repository quality is enforced through repository-owned scripts, workspace
+tasks, Turborepo orchestration, formatters, linters, Lefthook Git hooks, and
+GitHub Actions.
 
-## Manual validation
+The architecture and ownership model are documented in
+[ADR-011](../decisions/adr-011-unified-quality-gates.mdx).
 
-A complete local validation pass is:
+## Repository quality contract
+
+The primary validation commands are:
 
 ```bash
 pnpm format:check
-pnpm build
 pnpm lint
 pnpm check-types
+pnpm test
+pnpm build
+```
+
+A complete developer-facing validation pass is:
+
+```bash
+pnpm verify
+```
+
+The aggregate command currently performs:
+
+```text
+format:check
+→ lint
+→ check-types
+→ test
+→ build
+```
+
+Use:
+
+```bash
 git diff --check
 ```
 
-The formatting check combines:
+as an additional Git whitespace validation before finalizing substantial
+changes.
+
+## Formatting
+
+Formatting is repository-owned.
+
+The formatting contract combines:
 
 ```text
 Prettier
@@ -28,6 +62,47 @@ Prettier
 Remark
 → Docusaurus MDX content
 ```
+
+Docusaurus MDX is intentionally excluded from Prettier and handled by Remark.
+
+## Workspace validation
+
+Workspace-owned task implementations use common task names where appropriate:
+
+```text
+build
+test
+lint
+lint:fix
+check-types
+dev
+```
+
+A workspace participates only when it implements that task.
+
+For example, `pnpm test` currently discovers the UI browser test suite and will
+automatically include future workspace test tasks when they are added.
+
+## Build validation
+
+The root:
+
+```bash
+pnpm build
+```
+
+validates the repository build contract.
+
+It currently covers:
+
+```text
+Next.js web production build
+Docusaurus documentation production build
+Storybook static production build
+```
+
+Storybook uses an internal `build-storybook` task while remaining part of the
+public root build contract.
 
 ## Pre-commit
 
@@ -40,7 +115,8 @@ It can automatically format:
 
 ESLint fixes supported JavaScript and TypeScript files.
 
-The hook also runs repository type checking and conditionally executes UI Storybook tests when matching UI files are staged.
+The hook also runs repository type checking and conditionally executes the UI
+test task when matching UI files are staged.
 
 ## Commit message
 
@@ -48,20 +124,32 @@ Commitlint validates the final commit message.
 
 ## Pre-push
 
-The pre-push hook performs the strongest local validation:
+The pre-push hook performs the strongest local Git validation.
+
+Independent jobs run in parallel:
 
 ```text
 branch validation
 format check
-MDX validation
 lint
 type check
-UI Storybook tests
-Storybook production build
+tests
+builds
 ```
+
+The build contract includes the Storybook production build.
 
 ## Remote enforcement
 
-Local hooks can be bypassed and therefore should not be considered the final trust boundary.
+Local hooks can be bypassed and therefore are not the final trust boundary.
 
-GitHub Actions and branch protection should eventually reproduce critical validation remotely before protected branches can be updated.
+GitHub Actions reproduces the critical repository quality contract remotely.
+
+The stable aggregation check is:
+
+```text
+CI Gate
+```
+
+Branch protection remains responsible for turning that remote result into a
+required merge condition.

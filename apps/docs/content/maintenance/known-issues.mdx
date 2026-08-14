@@ -7,30 +7,6 @@ sidebar_position: 2
 
 This page tracks known non-blocking repository issues and follow-up engineering work.
 
-## Vitest and Vite native config warning
-
-The UI Vitest configuration currently imports the Vite configuration without an explicit file extension.
-
-Vite reports that this pattern will not be supported by the future native configuration loader.
-
-The warning currently points to:
-
-```text
-packages/ui/vitest.config.ts
-```
-
-This should be corrected in a dedicated Vitest/Vite maintenance change.
-
-## Storybook MDX story warning
-
-Storybook currently reports that no story files match:
-
-```text
-src/**/*.mdx
-```
-
-The warning is non-blocking because Storybook stories currently use TypeScript-based story files.
-
 ## Storybook bundle size warnings
 
 Storybook production builds may report large generated JavaScript chunks.

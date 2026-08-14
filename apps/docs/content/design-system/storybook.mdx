@@ -36,13 +36,34 @@ It is included in the repository-wide development workflow:
 pnpm dev
 ```
 
-This starts the web application, documentation application, and Storybook development environment together.
+This starts the web application, documentation application, and Storybook
+development environment together.
+
+For targeted Storybook development:
+
+```bash
+pnpm --filter @repo/ui dev
+```
 
 ## Production build
+
+The repository-wide build contract is:
+
+```bash
+pnpm build
+```
+
+It includes the Storybook production build together with the Web and Docs
+production builds.
+
+The internal UI task is:
 
 ```bash
 pnpm --filter @repo/ui build-storybook
 ```
+
+The specialized internal task name is intentional because Storybook is not the
+library build artifact consumed by downstream workspaces.
 
 The generated static output is written to:
 

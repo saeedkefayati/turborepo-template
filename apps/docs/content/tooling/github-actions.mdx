@@ -205,12 +205,21 @@ and installs Chromium with:
 pnpm --filter @repo/ui exec playwright install --with-deps chromium
 ```
 
-It then runs:
+It then runs the repository test contract:
 
 ```bash
-pnpm --filter @repo/ui test-storybook
-pnpm --filter @repo/ui build-storybook
+pnpm test
 ```
+
+The Storybook production build is not repeated in this dedicated browser job.
+
+It is already part of:
+
+```bash
+pnpm build
+```
+
+which runs in the Full CI native matrix.
 
 Browser tests are not currently duplicated across every operating system.
 
@@ -267,20 +276,26 @@ or tier-specific jobs are intentionally skipped.
 
 ## Local equivalents
 
-Before pushing, developers can run the same primary repository checks locally:
+Before pushing, developers can run the complete repository validation locally:
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm format:check
-pnpm lint
-pnpm check-types
-pnpm build
+pnpm verify
 ```
 
-UI validation:
+The equivalent primary quality contract is:
+
+```text
+format:check
+lint
+check-types
+test
+build
+```
+
+Targeted UI commands remain available for focused development:
 
 ```bash
-pnpm --filter @repo/ui test-storybook
+pnpm --filter @repo/ui test
 pnpm --filter @repo/ui build-storybook
 ```
 
@@ -404,6 +419,7 @@ For example:
 pnpm format:check
 pnpm lint
 pnpm check-types
+pnpm test
 pnpm build
 ```
 
@@ -576,6 +592,5 @@ After the successful initial CI run:
 - add Linux x64 musl validation
 - add Linux ARM64 musl validation
 - reevaluate Windows ARM64 as a required job when appropriate
-- consolidate repository test and quality commands
 - evaluate dependency update automation
 - evaluate Turborepo remote caching later

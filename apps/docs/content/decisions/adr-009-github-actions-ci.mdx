@@ -563,8 +563,7 @@ The remaining follow-up work is:
 3. Add Linux ARM64 musl validation.
 4. Reevaluate Windows ARM64 enforcement when runner maturity permits it.
 5. Keep the support matrix synchronized with observed CI results.
-6. Continue with repository quality-gate consolidation.
-7. Continue with security and dependency remediation after the CI trust boundary
+6. Continue with security and dependency remediation after the CI trust boundary
    is established.
 
 ## Supersession
@@ -572,8 +571,22 @@ The remaining follow-up work is:
 ADR-010 partially supersedes this decision for CI execution frequency, tier
 selection, `develop` push behavior, and the jobs required by `CI Gate`.
 
-The remaining provider, toolchain, platform, security, and validation decisions
-in this ADR remain active.
+ADR-011 supersedes the repository quality-command contract used by CI.
+
+The original Storybook-specific commands documented in this ADR remain part of
+the historical implementation record, but current GitHub Actions validation now
+consumes the unified repository commands such as:
+
+```text
+pnpm format:check
+pnpm lint
+pnpm check-types
+pnpm test
+pnpm build
+```
+
+The remaining provider, toolchain, platform, security, browser strategy, and
+cross-platform validation decisions in this ADR remain active.
 
 Future material changes should continue to be recorded through new ADRs rather
 than rewriting this decision history.
