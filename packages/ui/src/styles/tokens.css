@@ -7,13 +7,18 @@
   --color-surface-elevated: var(--ds-surface-elevated);
 
   --color-muted-foreground: var(--ds-muted-foreground);
+  --color-accent-foreground: var(--ds-accent-foreground);
 
   --color-border: var(--ds-border);
+  --color-control-border: var(--ds-control-border);
+
+  --color-focus: var(--ds-focus);
 
   --color-primary: var(--ds-primary);
   --color-primary-hover: var(--ds-primary-hover);
   --color-primary-foreground: var(--ds-primary-foreground);
 
   --color-danger: var(--ds-danger);
+  --color-danger-hover: var(--ds-danger-hover);
   --color-danger-foreground: var(--ds-danger-foreground);
 }
