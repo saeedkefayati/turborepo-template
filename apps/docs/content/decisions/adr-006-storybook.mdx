@@ -1,0 +1,24 @@
+---
+title: "ADR-006: Use Storybook for the Design System"
+sidebar_position: 7
+---
+
+# ADR-006: Use Storybook for the Design System
+
+**Status:** Accepted
+
+## Context
+
+Shared UI foundations and components require an isolated development and documentation environment.
+
+## Decision
+
+Use Storybook inside the shared UI package.
+
+## Consequences
+
+- components can be developed independently from product screens
+- design foundations have dedicated visual documentation
+- component variants can be reviewed consistently
+- browser-based story tests can validate component behavior
+- Storybook production builds can be included in repository quality gates

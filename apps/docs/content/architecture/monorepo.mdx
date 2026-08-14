@@ -1,0 +1,56 @@
+---
+title: Monorepo Architecture
+sidebar_position: 1
+---
+
+# Monorepo Architecture
+
+The project uses a pnpm workspace managed by Turborepo.
+
+The repository separates deployable applications from reusable packages and repository-level automation.
+
+## Applications
+
+### `apps/web`
+
+The main product application.
+
+It is implemented with Next.js and uses shared workspace packages where appropriate.
+
+### `apps/docs`
+
+The engineering documentation application.
+
+It is implemented with Docusaurus and stores documentation content under:
+
+```text
+apps/docs/content/
+```
+
+The docs application is configured in docs-only mode, so documentation routes are served from the site root.
+
+## Shared packages
+
+### `packages/ui`
+
+The shared React design system and component library.
+
+### `packages/eslint-config`
+
+Centralized ESLint configurations used by repository workspaces.
+
+### `packages/typescript-config`
+
+Shared TypeScript configuration presets.
+
+## Repository automation
+
+Git workflow automation lives under:
+
+```text
+scripts/git/
+```
+
+This includes branch creation, branch policy validation, and workspace scope discovery.
+
+Repository-level quality gates are coordinated by Lefthook and Turborepo.

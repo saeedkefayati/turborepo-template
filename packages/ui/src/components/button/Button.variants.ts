@@ -7,26 +7,26 @@ export const buttonVariants = cva(
     "font-body text-label",
     "transition-colors duration-fast ease-standard",
     "focus-visible:outline-none",
-    "focus-visible:ring-2 focus-visible:ring-primary",
+    "focus-visible:ring-2 focus-visible:ring-focus",
     "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:pointer-events-none disabled:opacity-50",
   ],
   {
     variants: {
       variant: {
-        primary: ["bg-primary text-primary-foreground", "shadow-xs", "hover:bg-primary-hover"],
+        primary: ["bg-primary text-primary-foreground", "shadow-control", "hover:bg-primary-hover"],
 
         secondary: ["bg-surface-muted text-foreground", "hover:bg-surface"],
 
         outline: [
-          "border border-border",
+          "border border-control-border",
           "bg-transparent text-foreground",
           "hover:bg-surface-muted",
         ],
 
         ghost: ["bg-transparent text-foreground", "hover:bg-surface-muted"],
 
-        danger: ["bg-danger text-danger-foreground", "hover:opacity-90"],
+        danger: ["bg-danger text-danger-foreground", "hover:bg-danger-hover"],
       },
 
       size: {

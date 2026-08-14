@@ -1,54 +1,119 @@
-@theme {
-  --font-body:
+:root {
+  /*
+   * Font-family contracts
+   *
+   * Applications may override these variables with their own font stacks,
+   * including variable fonts and script-specific fallbacks.
+   */
+  --ds-font-body:
     ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --font-display:
-    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --font-code:
+
+  --ds-font-display: var(--ds-font-body);
+
+  --ds-font-code:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
     monospace;
 
-  --text-caption: 0.75rem;
-  --text-caption--line-height: 1rem;
-  --text-caption--letter-spacing: 0.01em;
-  --text-caption--font-weight: 500;
+  /*
+   * Semantic typography metrics
+   *
+   * These are runtime-overridable so applications can adapt typography
+   * for a language or writing system without changing component code.
+   */
 
-  --text-label: 0.875rem;
-  --text-label--line-height: 1.25rem;
-  --text-label--letter-spacing: 0;
-  --text-label--font-weight: 500;
+  --ds-text-caption-size: 0.75rem;
+  --ds-text-caption-line-height: 1rem;
+  --ds-text-caption-letter-spacing: 0.01em;
+  --ds-text-caption-font-weight: 500;
 
-  --text-body-sm: 0.875rem;
-  --text-body-sm--line-height: 1.25rem;
-  --text-body-sm--letter-spacing: 0;
-  --text-body-sm--font-weight: 400;
+  --ds-text-label-size: 0.875rem;
+  --ds-text-label-line-height: 1.25rem;
+  --ds-text-label-letter-spacing: 0;
+  --ds-text-label-font-weight: 500;
 
-  --text-body: 1rem;
-  --text-body--line-height: 1.5rem;
-  --text-body--letter-spacing: 0;
-  --text-body--font-weight: 400;
+  --ds-text-body-sm-size: 0.875rem;
+  --ds-text-body-sm-line-height: 1.25rem;
+  --ds-text-body-sm-letter-spacing: 0;
+  --ds-text-body-sm-font-weight: 400;
 
-  --text-body-lg: 1.125rem;
-  --text-body-lg--line-height: 1.75rem;
-  --text-body-lg--letter-spacing: -0.005em;
-  --text-body-lg--font-weight: 400;
+  --ds-text-body-size: 1rem;
+  --ds-text-body-line-height: 1.5rem;
+  --ds-text-body-letter-spacing: 0;
+  --ds-text-body-font-weight: 400;
 
-  --text-title-sm: 1.25rem;
-  --text-title-sm--line-height: 1.75rem;
-  --text-title-sm--letter-spacing: -0.01em;
-  --text-title-sm--font-weight: 600;
+  --ds-text-body-lg-size: 1.125rem;
+  --ds-text-body-lg-line-height: 1.75rem;
+  --ds-text-body-lg-letter-spacing: 0;
+  --ds-text-body-lg-font-weight: 400;
 
-  --text-title: 1.5rem;
-  --text-title--line-height: 2rem;
-  --text-title--letter-spacing: -0.02em;
-  --text-title--font-weight: 600;
+  --ds-text-title-sm-size: 1.25rem;
+  --ds-text-title-sm-line-height: 1.75rem;
+  --ds-text-title-sm-letter-spacing: 0;
+  --ds-text-title-sm-font-weight: 600;
 
-  --text-heading: 2rem;
-  --text-heading--line-height: 2.5rem;
-  --text-heading--letter-spacing: -0.025em;
-  --text-heading--font-weight: 700;
+  --ds-text-title-size: 1.5rem;
+  --ds-text-title-line-height: 2rem;
+  --ds-text-title-letter-spacing: 0;
+  --ds-text-title-font-weight: 600;
 
-  --text-display: 3rem;
-  --text-display--line-height: 3.25rem;
-  --text-display--letter-spacing: -0.035em;
-  --text-display--font-weight: 700;
+  --ds-text-heading-size: 2rem;
+  --ds-text-heading-line-height: 2.5rem;
+  --ds-text-heading-letter-spacing: 0;
+  --ds-text-heading-font-weight: 700;
+
+  --ds-text-display-size: 3rem;
+  --ds-text-display-line-height: 3.25rem;
+  --ds-text-display-letter-spacing: 0;
+  --ds-text-display-font-weight: 700;
+}
+
+@theme inline {
+  --font-body: var(--ds-font-body);
+  --font-display: var(--ds-font-display);
+  --font-code: var(--ds-font-code);
+
+  --text-caption: var(--ds-text-caption-size);
+  --text-caption--line-height: var(--ds-text-caption-line-height);
+  --text-caption--letter-spacing: var(--ds-text-caption-letter-spacing);
+  --text-caption--font-weight: var(--ds-text-caption-font-weight);
+
+  --text-label: var(--ds-text-label-size);
+  --text-label--line-height: var(--ds-text-label-line-height);
+  --text-label--letter-spacing: var(--ds-text-label-letter-spacing);
+  --text-label--font-weight: var(--ds-text-label-font-weight);
+
+  --text-body-sm: var(--ds-text-body-sm-size);
+  --text-body-sm--line-height: var(--ds-text-body-sm-line-height);
+  --text-body-sm--letter-spacing: var(--ds-text-body-sm-letter-spacing);
+  --text-body-sm--font-weight: var(--ds-text-body-sm-font-weight);
+
+  --text-body: var(--ds-text-body-size);
+  --text-body--line-height: var(--ds-text-body-line-height);
+  --text-body--letter-spacing: var(--ds-text-body-letter-spacing);
+  --text-body--font-weight: var(--ds-text-body-font-weight);
+
+  --text-body-lg: var(--ds-text-body-lg-size);
+  --text-body-lg--line-height: var(--ds-text-body-lg-line-height);
+  --text-body-lg--letter-spacing: var(--ds-text-body-lg-letter-spacing);
+  --text-body-lg--font-weight: var(--ds-text-body-lg-font-weight);
+
+  --text-title-sm: var(--ds-text-title-sm-size);
+  --text-title-sm--line-height: var(--ds-text-title-sm-line-height);
+  --text-title-sm--letter-spacing: var(--ds-text-title-sm-letter-spacing);
+  --text-title-sm--font-weight: var(--ds-text-title-sm-font-weight);
+
+  --text-title: var(--ds-text-title-size);
+  --text-title--line-height: var(--ds-text-title-line-height);
+  --text-title--letter-spacing: var(--ds-text-title-letter-spacing);
+  --text-title--font-weight: var(--ds-text-title-font-weight);
+
+  --text-heading: var(--ds-text-heading-size);
+  --text-heading--line-height: var(--ds-text-heading-line-height);
+  --text-heading--letter-spacing: var(--ds-text-heading-letter-spacing);
+  --text-heading--font-weight: var(--ds-text-heading-font-weight);
+
+  --text-display: var(--ds-text-display-size);
+  --text-display--line-height: var(--ds-text-display-line-height);
+  --text-display--letter-spacing: var(--ds-text-display-letter-spacing);
+  --text-display--font-weight: var(--ds-text-display-font-weight);
 }

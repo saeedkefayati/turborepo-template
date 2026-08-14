@@ -1,0 +1,11 @@
+{
+  "label": "Tooling",
+  "position": 3,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Development Tooling",
+    "description": "Learn how the repository development tools are configured and used."
+  }
+}

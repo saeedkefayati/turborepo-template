@@ -1,0 +1,404 @@
+---
+title: "ADR-012: pnpm Catalogs for Shared Dependencies"
+description: "Centralize versions of intentionally shared external dependencies while preserving explicit dependency ownership in each workspace."
+---
+
+# ADR-012: pnpm Catalogs for Shared Dependencies
+
+## Status
+
+Accepted
+
+## Date
+
+2026-08-14
+
+## Context
+
+The repository contains multiple applications and packages that directly use
+the same external dependencies.
+
+Examples include:
+
+```text
+ESLint
+TypeScript
+React
+React DOM
+React type packages
+Node.js type packages
+clsx
+globals
+```
+
+Previously, each consumer repeated a version specifier in its own
+`package.json`.
+
+For example:
+
+```json
+{
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "typescript": "5.9.2"
+  }
+}
+```
+
+This makes dependency ownership explicit, but the version policy is duplicated.
+
+Over time, repeated ranges can drift between workspaces and make repository-wide
+upgrades harder to reason about.
+
+Moving every shared tool only to the root package would remove version
+duplication but would also create implicit dependencies.
+
+For example, a workspace script such as:
+
+```json
+{
+  "scripts": {
+    "lint": "eslint ."
+  }
+}
+```
+
+should not have to rely silently on an undeclared root dependency.
+
+The repository therefore needs both:
+
+```text
+explicit dependency ownership
++
+centralized shared version policy
+```
+
+## Decision
+
+Use pnpm Catalogs for external dependencies that:
+
+1. are directly declared by multiple workspace consumers
+2. are intentionally expected to use one repository-wide version baseline
+3. do not represent an intentional multi-version compatibility requirement
+
+Each consumer continues to declare the dependency explicitly.
+
+The version itself is defined once in:
+
+```text
+pnpm-workspace.yaml
+```
+
+Consumers reference the default catalog with:
+
+```text
+catalog:
+```
+
+## Current default catalog
+
+The initial shared catalog contains:
+
+```text
+@types/node
+@types/react
+@types/react-dom
+clsx
+eslint
+globals
+react
+react-dom
+typescript
+```
+
+The corresponding repository baselines are defined only in
+`pnpm-workspace.yaml`.
+
+For example:
+
+```yaml
+catalog:
+  eslint: ^9.39.1
+  react: ^19.2.0
+  react-dom: ^19.2.0
+  typescript: 5.9.2
+```
+
+A consumer declares:
+
+```json
+{
+  "devDependencies": {
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}
+```
+
+## Explicit ownership
+
+Catalogs centralize versions but do not centralize dependency ownership.
+
+If a workspace directly runs or imports a dependency, that workspace should
+normally continue to declare it.
+
+For example:
+
+```text
+root
+→ declares eslint because the repository-level Lefthook job executes ESLint
+
+web
+→ declares eslint because its lint task executes ESLint
+
+docs
+→ declares eslint because its lint task executes ESLint
+
+ui
+→ declares eslint because its lint task executes ESLint
+```
+
+All of those declarations reference the same catalog entry.
+
+This keeps package manifests understandable without duplicating the version
+range.
+
+## Internal workspace dependencies
+
+pnpm Catalogs do not replace the workspace protocol.
+
+Repository-owned packages continue to use:
+
+```text
+workspace:*
+```
+
+Examples include:
+
+```text
+@repo/ui
+@repo/eslint-config
+@repo/typescript-config
+```
+
+The distinction is:
+
+```text
+workspace:*
+→ resolve a package implemented inside this monorepo
+
+catalog:
+→ resolve the version policy for a shared external package
+```
+
+## Catalog selection criteria
+
+Not every dependency belongs in the shared catalog.
+
+A package should normally enter the default catalog when the same external
+package is directly consumed by at least two repository packages and one shared
+version is intentional.
+
+A package should normally remain directly versioned when:
+
+- it has only one direct consumer
+- it is implementation-specific to one workspace
+- version independence is desirable
+- the dependency is experimental or intentionally tracks a distribution tag
+- centralization would add indirection without reducing meaningful drift
+
+For that reason, repository-local Docusaurus, Storybook, Tailwind CSS,
+Prettier, Next.js, and similar single-consumer dependencies are not
+automatically moved into the shared catalog.
+
+Catalogs are a version-consistency mechanism, not a requirement to centralize
+every version string in the repository.
+
+## Catalog mode
+
+The repository uses:
+
+```yaml
+catalogMode: prefer
+```
+
+When adding dependencies, pnpm prefers an existing compatible default-catalog
+version.
+
+Dependencies that are not part of the catalog can still be added normally.
+
+This provides useful automatic reuse without requiring every external
+dependency to be catalog-managed.
+
+Strict catalog enforcement can be reconsidered separately when its workflow,
+dependency-update automation, and pnpm behavior have been validated for this
+repository.
+
+## Multiple versions
+
+A shared default catalog does not prevent the repository from supporting
+multiple dependency versions in the future.
+
+If a deliberate migration requires separate version lanes, pnpm named catalogs
+can be introduced.
+
+For example:
+
+```yaml
+catalog:
+  react: ^19.2.0
+  react-dom: ^19.2.0
+
+catalogs:
+  react20:
+    react: ^20.0.0
+    react-dom: ^20.0.0
+```
+
+A selected workspace could then use:
+
+```json
+{
+  "dependencies": {
+    "react": "catalog:react20",
+    "react-dom": "catalog:react20"
+  }
+}
+```
+
+This makes intentional version divergence explicit rather than allowing
+accidental drift between package manifests.
+
+## Version-range policy
+
+The catalog preserves the repository's intended range policy.
+
+Examples:
+
+```text
+eslint
+→ compatible minor and patch upgrades within ESLint 9
+
+react
+→ compatible minor and patch upgrades within React 19
+
+typescript
+→ exact repository compiler baseline
+
+React type packages
+→ exact type baseline
+```
+
+Changing those policies must be done in the catalog rather than independently
+inside consumer manifests.
+
+## Dependency upgrades
+
+For a catalog-managed dependency, the catalog entry is the version source of
+truth.
+
+A normal repository-wide upgrade therefore changes:
+
+```text
+pnpm-workspace.yaml
+```
+
+followed by:
+
+```bash
+pnpm install
+pnpm verify
+```
+
+The consuming package manifests normally remain unchanged.
+
+This reduces repetitive edits and makes a shared dependency upgrade easier to
+review.
+
+## Consequences
+
+### Positive
+
+- shared dependency versions have one source of truth
+- workspace dependency ownership remains explicit
+- accidental version drift is reduced
+- repository-wide upgrades require fewer manifest changes
+- package manifests contain less repeated version policy
+- root-level tooling can declare the same shared tools as workspace consumers
+- intentional future multi-version migrations can use named catalogs
+- internal packages continue to use the semantically correct workspace protocol
+
+### Negative
+
+- dependency resolution now requires understanding the `catalog:` protocol
+- the effective version is not visible directly inside every package manifest
+- catalog membership must be maintained deliberately
+- not every dependency can be upgraded by editing only its consumer manifest
+- named catalogs add complexity if intentional multi-version support is later
+  required
+
+## Alternatives considered
+
+### Install shared tools only at the workspace root
+
+Rejected as the default policy.
+
+This reduces repeated declarations but makes workspace scripts depend on tools
+that the workspace itself does not declare.
+
+The repository prefers explicit consumer ownership.
+
+### Repeat the same semver range in every package
+
+Rejected for intentionally shared dependencies.
+
+This is simple initially but creates multiple version-policy sources of truth.
+
+### Use `workspace:*` for external dependencies
+
+Rejected.
+
+The workspace protocol identifies packages implemented inside the current
+workspace.
+
+External registry packages such as ESLint and React are not workspace packages.
+
+### Put every external dependency in the catalog
+
+Rejected.
+
+Catalogs are used where they reduce real version drift.
+
+Single-consumer and workspace-specific dependencies retain direct version
+specifiers unless a future architectural reason justifies centralizing them.
+
+### Enable strict catalog mode immediately
+
+Deferred.
+
+The repository currently prefers catalog reuse without making all dependency
+addition and update workflows dependent on strict enforcement behavior.
+
+Strict mode can be evaluated later together with dependency-update automation.
+
+## Relationship to other ADRs
+
+ADR-002 remains authoritative for the selection of pnpm as the repository
+package manager.
+
+ADR-008 remains authoritative for the locked Node.js and pnpm toolchain.
+
+ADR-011 remains authoritative for repository quality commands and task
+ownership.
+
+This ADR defines shared external dependency version ownership and complements
+those decisions.
+
+## Follow-up work
+
+1. keep catalog membership synchronized with actual multi-workspace usage
+2. evaluate strict catalog enforcement when dependency-update automation is
+   introduced
+3. use named catalogs only for deliberate multi-version migrations
+4. continue dependency and security remediation independently of catalog
+   adoption

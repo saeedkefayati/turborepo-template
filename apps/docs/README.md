@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# Documentation
 
-## Getting Started
+This workspace contains the project engineering documentation powered by Docusaurus.
 
-First, run the development server:
+## Development
+
+From the repository root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm --filter docs dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The documentation site runs at:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3001
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+## Build
 
-## Learn More
+```bash
+pnpm --filter docs build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Type checking
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm --filter docs check-types
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Linting
 
-## Deploy on Vercel
+```bash
+pnpm --filter docs lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## MDX formatting
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Format documentation content:
+
+```bash
+pnpm --filter docs format:mdx
+```
+
+Validate documentation content:
+
+```bash
+pnpm --filter docs check:mdx
+```
+
+The root repository formatting commands automatically coordinate Prettier and Remark:
+
+```bash
+pnpm format
+pnpm format:check
+```
+
+Prettier handles regular repository files.
+
+Remark handles:
+
+```text
+apps/docs/content/**/*.mdx
+```
+
+## Production preview
+
+```bash
+pnpm --filter docs serve
+```
+
+## Content
+
+Documentation content lives under:
+
+```text
+apps/docs/content/
+```
+
+Documentation pages use the `.mdx` extension.
+
+Top-level and nested sidebar categories are generated from the filesystem.
+
+Category behavior and generated landing pages are configured through:
+
+```text
+_category_.json
+```
+
+Individual documents use MDX front matter for metadata such as titles and sidebar ordering.
+
+The documentation site is configured in docs-only mode, so documentation routes are served from the site root.
+
+## Toolchain
+
+Repository development uses mise to provision the pinned Node.js and pnpm versions.
+
+The current baseline is:
+
+```text
+Node.js 24.19.0 LTS
+pnpm 11.21.0 stable
+```
+
+After cloning the repository:
+
+```bash
+mise trust
+mise install --locked
+pnpm install --frozen-lockfile
+```
+
+mise manages the external development toolchain.
+
+pnpm remains the repository package manager and is used for dependency management, workspace operations, and repository scripts.
+
+For the complete rationale, platform support matrix, and upgrade policy, see the engineering documentation under:
+
+- Getting Started
+- Tooling / mise
+- Tooling / pnpm
+- Maintenance / Cross-Platform Support
+- ADR-008: Standardize the Cross-Platform Toolchain

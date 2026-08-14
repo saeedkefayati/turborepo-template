@@ -1,0 +1,178 @@
+---
+title: Dependency Management
+sidebar_position: 1
+---
+
+# Dependency Management
+
+Dependencies are managed with pnpm workspaces.
+
+## General rules
+
+Install dependencies in the smallest workspace that requires them.
+
+Do not add application-specific dependencies to the repository root.
+
+Use the root workspace for repository-wide development tooling.
+
+Examples:
+
+```bash
+pnpm --filter web add <package>
+pnpm --filter docs add <package>
+pnpm --filter @repo/ui add <package>
+pnpm add -Dw <repository-tool>
+```
+
+## Lockfile
+
+`pnpm-lock.yaml` is committed and must remain reproducible.
+
+Normal bootstrap uses:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+A non-frozen install is appropriate when intentionally changing dependencies or migrating pnpm.
+
+```bash
+pnpm install
+```
+
+After the change, run the frozen installation again to confirm reproducibility.
+
+## Dependency build scripts
+
+Dependency lifecycle scripts are considered privileged behavior.
+
+pnpm is configured to reject unreviewed dependency builds.
+
+When pnpm reports an ignored or unapproved build script:
+
+1. identify the dependency
+2. determine why its build script is required
+3. review whether the package is trusted
+4. approve only the required package
+5. commit the resulting workspace policy
+
+Do not globally enable all dependency scripts.
+
+## Node.js compatibility
+
+The repository uses a pinned Node.js development runtime and strict dependency engine checking.
+
+Dependencies must remain compatible with the Node.js target declared in `pnpm-workspace.yaml`.
+
+## Toolchain upgrades
+
+Node.js and pnpm upgrades are repository-level migrations.
+
+Do not update them casually as part of an unrelated feature branch.
+
+A toolchain upgrade requires:
+
+- `mise.toml` update
+- `mise.lock` regeneration
+- package metadata update
+- workspace policy update when applicable
+- clean installation
+- full repository validation
+- cross-platform CI validation
+- documentation update
+
+## Major-version policy
+
+The default repository baseline prefers:
+
+```text
+Node.js LTS releases
+pnpm stable releases
+```
+
+Do not move the default toolchain to alpha, beta, RC, or Node.js Current releases solely because they are newer.
+
+Node.js 26 should be reconsidered after it reaches LTS.
+
+pnpm 12 should be reconsidered after it reaches stable status.
+
+## Shared dependency ownership
+
+Dependency declarations follow three ownership patterns.
+
+| Dependency type                   | Version/reference policy                      |
+| --------------------------------- | --------------------------------------------- |
+| Internal repository package       | `workspace:*`                                 |
+| Shared external dependency        | `catalog:`                                    |
+| Package-local external dependency | direct semver or intentional distribution tag |
+
+### Internal packages
+
+Repository-owned packages are linked explicitly with the workspace protocol.
+
+Examples:
+
+```text
+@repo/ui
+@repo/eslint-config
+@repo/typescript-config
+```
+
+This guarantees that consumers resolve the local workspace implementation.
+
+### Shared external packages
+
+External dependencies directly used by multiple consumers and expected to share
+one baseline use the pnpm catalog.
+
+Examples currently include:
+
+```text
+eslint
+typescript
+react
+react-dom
+@types/react
+@types/react-dom
+@types/node
+clsx
+globals
+```
+
+The consumer still owns the dependency declaration, while
+`pnpm-workspace.yaml` owns the version range.
+
+### Package-local dependencies
+
+Dependencies that belong to one implementation remain directly versioned in
+that package.
+
+Examples can include framework-specific, testing-specific, documentation, or
+build dependencies that have no repository-wide shared-version requirement.
+
+This avoids turning the catalog into a second lockfile or a list of every
+dependency in the monorepo.
+
+## Updating a catalog-managed dependency
+
+For a normal shared upgrade:
+
+1. update the version range in `pnpm-workspace.yaml`
+2. run `pnpm install`
+3. inspect the lockfile change
+4. run `pnpm verify`
+5. run cross-platform CI before merging architecture-sensitive upgrades
+
+Consumer `package.json` files normally remain unchanged because they reference
+`catalog:`.
+
+## Intentional version divergence
+
+Different versions of the same dependency must be an explicit architectural
+choice.
+
+When a gradual migration requires separate version lanes, use pnpm named
+catalogs.
+
+Do not replace `catalog:` with ad hoc direct ranges in individual workspaces
+without documenting why the repository requires that divergence.

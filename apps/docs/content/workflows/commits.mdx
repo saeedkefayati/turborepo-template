@@ -1,0 +1,53 @@
+---
+title: Commits
+sidebar_position: 2
+---
+
+# Commits
+
+Commits should represent a clear and reviewable engineering intent.
+
+Prefer small, coherent commits over unrelated groups of changes.
+
+## Recommended workflow
+
+Review the working tree:
+
+```bash
+git status --short
+git diff
+```
+
+Stage the intended changes:
+
+```bash
+git add <paths>
+```
+
+Review the staged diff:
+
+```bash
+git diff --cached --check
+git diff --cached --stat
+```
+
+Create the commit:
+
+```bash
+pnpm commit
+```
+
+## Commit boundaries
+
+Avoid combining unrelated concerns.
+
+Examples of changes that generally deserve separate commits include:
+
+- documentation changes
+- dependency migrations
+- bug fixes
+- design-system additions
+- infrastructure changes
+- toolchain upgrades
+
+A clean commit history makes reviews, reverts, and future debugging easier.

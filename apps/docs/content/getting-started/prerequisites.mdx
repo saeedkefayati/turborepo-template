@@ -1,0 +1,101 @@
+---
+title: Prerequisites
+sidebar_position: 1
+---
+
+# Prerequisites
+
+The repository uses a project-managed toolchain so that developers do not need to manually coordinate Node.js and pnpm versions.
+
+## Required software
+
+Install the following system-level tools before cloning the repository:
+
+- Git
+- mise
+
+Node.js and pnpm should not be installed manually specifically for this repository.
+
+mise installs the project-required versions from `mise.toml`.
+
+## Toolchain versions
+
+The current project baseline is:
+
+```text
+Node.js 24.19.0 LTS
+pnpm 11.21.0
+mise >= 2026.8.5
+```
+
+The exact versions are controlled by the repository.
+
+## Supported environments
+
+The target development environments are:
+
+```text
+Linux x64 glibc
+Linux ARM64 glibc
+Linux x64 musl
+Linux ARM64 musl
+macOS ARM64
+Windows x64
+Windows ARM64
+```
+
+See the Cross-Platform Support documentation for details.
+
+## Verify Git
+
+```bash
+git --version
+```
+
+## Verify mise
+
+```bash
+mise --version
+```
+
+## Do not manually select Node.js or pnpm
+
+Do not use a different Node.js or pnpm version simply because it is already installed globally.
+
+After entering the repository, use:
+
+```bash
+mise install --locked
+```
+
+Then verify:
+
+```bash
+node --version
+pnpm --version
+```
+
+The expected versions are:
+
+```text
+v24.19.0
+11.21.0
+```
+
+## Browser testing
+
+The UI package uses Playwright Chromium for Storybook browser tests.
+
+The required browser can be installed through the UI workspace when needed.
+
+```bash
+pnpm --filter @repo/ui exec playwright install chromium
+```
+
+Some Linux environments may require the operating-system dependencies installed by Playwright.
+
+## Git hooks
+
+Lefthook is installed as a repository development dependency.
+
+After dependencies are installed, Git hooks enforce repository quality gates automatically.

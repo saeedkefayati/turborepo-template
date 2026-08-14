@@ -1,0 +1,173 @@
+---
+title: Quality Gates
+sidebar_position: 4
+---
+
+# Quality Gates
+
+Repository quality is enforced through repository-owned scripts, workspace
+tasks, Turborepo orchestration, formatters, linters, Lefthook Git hooks, and
+GitHub Actions.
+
+The architecture and ownership model are documented in
+[ADR-011](../decisions/adr-011-unified-quality-gates.mdx).
+
+## Repository quality contract
+
+The primary validation commands are:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm check-types
+pnpm test
+pnpm build
+```
+
+A complete developer-facing validation pass is:
+
+```bash
+pnpm verify
+```
+
+The aggregate command currently performs:
+
+```text
+format:check
+→ lint
+→ check-types
+→ test
+→ build
+```
+
+Use:
+
+```bash
+git diff --check
+```
+
+as an additional Git whitespace validation before finalizing substantial
+changes.
+
+## Formatting
+
+Formatting is repository-owned.
+
+The formatting contract combines:
+
+```text
+Prettier
+→ regular repository files
+
+Remark
+→ Docusaurus MDX content
+```
+
+Docusaurus MDX is intentionally excluded from Prettier and handled by Remark.
+
+## Workspace validation
+
+Workspace-owned task implementations use common task names where appropriate:
+
+```text
+build
+test
+lint
+lint:fix
+check-types
+dev
+```
+
+A workspace participates only when it implements that task.
+
+For example, `pnpm test` currently discovers the UI browser test suite and will
+automatically include future workspace test tasks when they are added.
+
+## Build validation
+
+The root:
+
+```bash
+pnpm build
+```
+
+validates the repository build contract.
+
+It currently covers:
+
+```text
+Next.js web production build
+Docusaurus documentation production build
+Storybook static production build
+```
+
+Storybook uses an internal `build-storybook` task while remaining part of the
+public root build contract.
+
+## Pre-commit
+
+The pre-commit hook validates the branch and staged source files.
+
+It can automatically format:
+
+- regular supported files with Prettier
+- Docusaurus MDX files with Remark
+
+ESLint fixes supported JavaScript and TypeScript files.
+
+The hook also runs repository type checking and conditionally executes the UI
+test task when matching UI files are staged.
+
+## Commit message
+
+Commitlint validates the final commit message.
+
+## Pre-push
+
+The pre-push hook performs the strongest local Git validation.
+
+Independent jobs run in parallel:
+
+```text
+branch validation
+format check
+lint
+type check
+tests
+builds
+```
+
+The build contract includes the Storybook production build.
+
+## Remote enforcement
+
+Local hooks can be bypassed and therefore are not the final trust boundary.
+
+GitHub Actions reproduces the critical repository quality contract remotely.
+
+The stable aggregation check is:
+
+```text
+CI Gate
+```
+
+`CI Gate` is the canonical remote merge signal consumed by branch protection.
+
+Individual CI jobs may run conditionally based on the files or platform tiers
+affected by a change. A conditionally skipped job is not considered a failure
+when that job is intentionally outside the current execution tier.
+
+A pull request should not be merged until required checks have completed
+successfully and `CI Gate` reports success.
+
+The current pull request workflow can wait for remote validation with:
+
+```bash
+gh pr checks <branch> \
+  --watch \
+  --interval 10 \
+  --fail-fast
+```
+
+Branch protection remains responsible for enforcing the required remote merge
+condition.

@@ -1,0 +1,186 @@
+---
+title: Components
+sidebar_position: 2
+---
+
+# Components
+
+Reusable UI components live in the shared `@repo/ui` package.
+
+Components should provide stable public APIs, remain independent of
+application-specific business logic, and prefer native platform semantics when
+possible.
+
+## Component groups
+
+Storybook currently organizes components into two primary groups:
+
+```text
+Primitives
+Form Controls
+```
+
+`Button` is a general-purpose primitive because it is used outside forms as
+well as inside them.
+
+Form-specific controls and composition primitives live under `Form Controls`.
+
+## Button
+
+The reusable Button primitive supports the following variants:
+
+```text
+primary
+secondary
+outline
+ghost
+danger
+```
+
+Supported sizes include:
+
+```text
+sm
+md
+lg
+icon
+```
+
+The component supports:
+
+- native button behavior
+- refs
+- disabled state
+- loading state
+- accessibility state through `aria-busy`
+
+## Form controls
+
+The current form-control foundation includes:
+
+```text
+Input
+Textarea
+Checkbox
+Radio
+Switch
+Select
+Label
+Field
+Fieldset
+Legend
+```
+
+### Shared sizing
+
+Visual form controls use the `controlSize` API instead of overloading native
+HTML attributes such as `size`.
+
+Supported values are:
+
+```text
+sm
+md
+lg
+```
+
+Native attributes remain available when they do not conflict with the
+component API.
+
+### Native semantics
+
+Components prefer native HTML behavior where possible.
+
+Examples include:
+
+- `Input` renders a native `input`
+- `Textarea` renders a native `textarea`
+- `Select` uses a native single-select control
+- `Checkbox` and `Radio` use native inputs
+- `Switch` uses a checkbox with `role="switch"`
+- `Label` uses a native `label`
+- `Fieldset` and `Legend` preserve native group semantics
+
+This keeps browser behavior, keyboard interaction, form submission, and
+accessibility semantics aligned with the platform.
+
+### Field composition
+
+`Field` provides a lightweight composition layer for individual controls.
+
+It exports:
+
+```text
+Field
+FieldLabel
+FieldDescription
+FieldError
+```
+
+Consumers remain responsible for explicit accessibility relationships such as:
+
+```text
+id
+htmlFor
+aria-describedby
+aria-invalid
+```
+
+The component does not use context, automatic ID generation, element cloning,
+or client-side state to create implicit relationships.
+
+`Fieldset` and `Legend` are used when multiple related controls form one
+semantic group.
+
+### Wrapped-control class names
+
+Controls that require an internal layout wrapper follow this convention:
+
+```text
+Checkbox
+Radio
+Switch
+Select
+```
+
+For these components, `className` targets the component layout root.
+
+The underlying native element can be styled separately through:
+
+```text
+Checkbox.inputClassName
+Radio.inputClassName
+Switch.inputClassName
+Select.selectClassName
+```
+
+Components without an internal wrapper continue to apply `className` directly
+to their native root element.
+
+### Direction
+
+Direction is inherited from the application by default.
+
+Components use logical CSS properties instead of physical left/right
+assumptions.
+
+Controls with directional visual siblings, such as `Select` and `Switch`,
+also support an explicit local `dir` so their visual layout remains aligned
+with the native control.
+
+The application remains responsible for setting the document-level language
+and direction.
+
+### Implementation conventions
+
+Variant composition uses Class Variance Authority.
+
+Class composition uses `clsx` and `tailwind-merge` through the shared `cn()`
+utility.
+
+Components avoid framework-specific dependencies and unnecessary client-side
+React features so the shared UI package remains compatible with server-rendered
+applications.
+
+Public package exports allow consumers to import components through
+`@repo/ui` instead of internal implementation paths.

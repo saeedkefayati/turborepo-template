@@ -1,0 +1,35 @@
+---
+slug: /
+title: Documentation
+sidebar_label: Introduction
+sidebar_position: 0
+---
+
+# Turborepo Template Documentation
+
+This site contains the engineering documentation for the monorepo.
+
+The repository is organized around multiple applications, shared packages, centralized engineering tooling, automated Git workflows, and a reusable UI design system.
+
+## Documentation areas
+
+The documentation is divided into the following areas:
+
+- **Getting Started** — environment setup and local development
+- **Architecture** — monorepo organization and repository structure
+- **Tooling** — pnpm, Turborepo, TypeScript, ESLint, Prettier, Lefthook, and commit tooling
+- **Workflows** — branching, commits, pull requests, and quality gates
+- **Design System** — foundations, shared components, Storybook, and testing
+- **Architecture Decisions** — important engineering decisions and their rationale
+- **Maintenance** — dependency management, technical debt, and known issues
+
+## Repository model
+
+The repository currently contains two applications:
+
+- `apps/web` — the main Next.js web application
+- `apps/docs` — the Docusaurus documentation application
+
+Shared packages live under `packages/`, while repository automation and Git workflow tooling live under `scripts/`.
+
+Use the sidebar to navigate through the engineering documentation.

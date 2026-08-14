@@ -1,0 +1,115 @@
+---
+title: Turborepo
+sidebar_position: 2
+---
+
+# Turborepo
+
+Turborepo coordinates workspace-owned repository tasks across applications and
+packages.
+
+The task ownership model is defined in
+[ADR-011](../decisions/adr-011-unified-quality-gates.mdx).
+
+## Root commands
+
+The primary root commands that delegate to Turbo are:
+
+```bash
+pnpm dev
+pnpm build
+pnpm test
+pnpm lint
+pnpm lint:fix
+pnpm check-types
+```
+
+Formatting remains a repository-owned operation rather than a duplicated
+workspace Turbo task.
+
+## Build
+
+The public repository build command executes:
+
+```bash
+turbo run build build-storybook
+```
+
+Normal workspace `build` tasks depend on builds from upstream workspace
+dependencies:
+
+```json
+"dependsOn": ["^build"]
+```
+
+The current production outputs include:
+
+```text
+.next/**
+build/**
+storybook-static/**
+```
+
+The Storybook artifact uses the specialized internal task:
+
+```text
+@repo/ui#build-storybook
+```
+
+This keeps Storybook out of the normal workspace dependency-build semantics
+while still including it in the root `pnpm build` contract.
+
+Next.js cache and development outputs are excluded from cached production
+outputs where appropriate.
+
+## Testing
+
+The root test command executes:
+
+```bash
+turbo run test
+```
+
+Every workspace that exposes a real `test` task participates automatically.
+
+The UI workspace currently provides the repository browser test suite.
+
+The test task currently bypasses Turbo caching so browser validation executes on
+each quality-gate invocation.
+
+## Development
+
+Development tasks are:
+
+- persistent
+- not cached
+
+This allows application and Storybook development servers to remain active.
+
+## Type checking
+
+The root type-check command executes:
+
+```bash
+turbo run check-types
+```
+
+Each participating workspace defines its own implementation.
+
+## Linting
+
+Repository workspaces expose a common `lint` task which Turbo runs across the
+workspace graph.
+
+Shared ESLint policy and workspace lint execution are intentionally separate
+concerns.
+
+## Formatting
+
+Formatting does not currently use `turbo run format`.
+
+Prettier owns regular files across the entire repository, including root and
+automation files, while Remark owns Docusaurus MDX.
+
+A workspace-level formatting graph should only be introduced if future
+workspace technologies genuinely require different formatting implementations.

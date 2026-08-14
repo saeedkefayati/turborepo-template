@@ -1,0 +1,94 @@
+---
+title: Repository Structure
+sidebar_position: 2
+---
+
+# Repository Structure
+
+The high-level repository structure is:
+
+```text
+.
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── apps/
+│   ├── docs/
+│   └── web/
+│
+├── packages/
+│   ├── eslint-config/
+│   ├── typescript-config/
+│   └── ui/
+│
+├── scripts/
+│   └── git/
+│
+├── .editorconfig
+├── .gitattributes
+├── commitlint.config.mjs
+├── eslint.config.mjs
+├── lefthook.yml
+├── mise.lock
+├── mise.toml
+├── package.json
+├── pnpm-workspace.yaml
+├── prettier.config.mjs
+├── turbo.json
+└── pnpm-lock.yaml
+```
+
+## `.github/`
+
+Contains GitHub-hosted repository automation.
+
+The primary workflow is:
+
+```text
+.github/workflows/ci.yml
+```
+
+It provides remote validation for repository changes and is intended to become the trust boundary used by branch protection after the workflow has been proven stable.
+
+## `apps/`
+
+Contains deployable or independently runnable applications.
+
+## `packages/`
+
+Contains reusable workspace packages.
+
+Packages should expose reusable functionality without depending on application-specific implementation details.
+
+## `scripts/git/`
+
+Contains repository-specific Git workflow tooling:
+
+```text
+branch-policy.mjs
+branch.mjs
+scopes.mjs
+validate-branch.mjs
+```
+
+## Root configuration
+
+Repository-wide tooling is configured at the root whenever possible.
+
+The root also contains the cross-platform development contract:
+
+- `mise.toml` defines the exact Node.js and pnpm toolchain.
+- `mise.lock` locks resolved tool metadata for supported platforms.
+- `.editorconfig` defines editor-level text conventions.
+- `.gitattributes` defines Git line-ending and binary-file behavior.
+
+Examples include:
+
+- Turborepo task orchestration
+- Prettier formatting
+- Commitlint rules
+- Git hooks
+- workspace package management
+
+This reduces configuration drift between workspaces.

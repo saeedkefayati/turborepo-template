@@ -1,0 +1,11 @@
+{
+  "label": "Workflows",
+  "position": 4,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Engineering Workflows",
+    "description": "Understand branches, commits, pull requests, and repository quality gates."
+  }
+}

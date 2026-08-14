@@ -1,0 +1,77 @@
+---
+title: Remark
+sidebar_position: 6
+---
+
+# Remark
+
+Remark is the formatter and Markdown-processing tool used for Docusaurus MDX content.
+
+Docusaurus documentation files under:
+
+```text
+apps/docs/content/**/*.mdx
+```
+
+are intentionally excluded from Prettier and processed with Remark instead.
+
+## Configuration
+
+Remark is configured in:
+
+```text
+apps/docs/.remarkrc.mjs
+```
+
+The configuration enables support for:
+
+- MDX
+- front matter
+- GitHub Flavored Markdown
+- directives
+- consistent Markdown style
+- recommended Markdown lint rules
+
+## Format MDX
+
+Format all documentation MDX files with:
+
+```bash
+pnpm --filter docs format:mdx
+```
+
+The formatter rewrites MDX using the configured Remark rules and validates the resulting content.
+
+## Validate MDX
+
+Validate MDX without rewriting files:
+
+```bash
+pnpm --filter docs check:mdx
+```
+
+This command checks MDX syntax and the configured lint rules.
+
+## Repository Integration
+
+The repository-level formatting workflow coordinates Prettier and Remark:
+
+```text
+pnpm format
+├── Prettier
+└── Remark
+
+pnpm format:check
+├── Prettier check
+└── Remark validation
+```
+
+Prettier remains responsible for regular repository source and configuration files.
+
+Remark is responsible for Docusaurus MDX content.
+
+## Git Hooks
+
+The pre-commit hook automatically formats and validates staged MDX files with Remark.
+
+The pre-push hook runs the repository-level formatting check, which includes Remark validation.

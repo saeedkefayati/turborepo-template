@@ -1,29 +1,56 @@
 {
   "name": "docs",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3001",
-    "build": "next build",
-    "start": "next start",
+    "dev": "docusaurus start --port 3001 --no-open",
+    "build": "docusaurus build",
+    "start": "docusaurus start --port 3001 --no-open",
+    "serve": "docusaurus serve --port 3001",
+    "clear": "docusaurus clear",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "check-types": "next typegen && tsc --noEmit"
+    "format:mdx": "remark \"content/**/*.mdx\" --ext mdx --output --quiet && pnpm check:mdx",
+    "check:mdx": "remark \"content/**/*.mdx\" --ext mdx --no-stdout --frail",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
-    "next": "16.3.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/faster": "3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
+    "@mdx-js/react": "^3.0.0",
+    "clsx": "catalog:",
+    "prism-react-renderer": "^2.3.0",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
+    "@docusaurus/module-type-aliases": "3.10.2",
+    "@docusaurus/tsconfig": "3.10.2",
+    "@docusaurus/types": "3.10.2",
     "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.15.3",
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
-    "eslint": "^9.39.1",
-    "typescript": "5.9.2"
+    "@types/react": "catalog:",
+    "eslint": "catalog:",
+    "globals": "catalog:",
+    "remark-cli": "^12.0.1",
+    "remark-directive": "^4.0.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
+    "remark-preset-lint-consistent": "^6.0.1",
+    "remark-preset-lint-recommended": "^7.0.1",
+    "typescript": "catalog:"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 3 chrome version",
+      "last 3 firefox version",
+      "last 5 safari version"
+    ]
   }
 }

@@ -1,0 +1,11 @@
+{
+  "label": "Architecture",
+  "position": 2,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Architecture",
+    "description": "Understand the monorepo architecture, applications, packages, and repository structure."
+  }
+}

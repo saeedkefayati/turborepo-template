@@ -1,0 +1,98 @@
+---
+title: Known Issues
+sidebar_position: 2
+---
+
+# Known Issues
+
+This page tracks known non-blocking repository issues and follow-up engineering work.
+
+## Storybook bundle size warnings
+
+Storybook production builds may report large generated JavaScript chunks.
+
+The build currently succeeds, but bundle size optimization can be investigated separately if required.
+
+## Storybook MCP peer dependency warning
+
+Installation can report a Valibot peer dependency mismatch through Storybook MCP-related packages.
+
+The warning is currently non-blocking and should not be patched manually without verifying upstream package compatibility.
+
+## Docusaurus dependency warnings
+
+Dependency installation may emit peer-dependency warnings from the Docusaurus faster toolchain.
+
+The current Docusaurus development and production builds succeed despite these warnings.
+
+Any override should be introduced only after confirming compatibility with upstream Docusaurus packages.
+
+## Local Git hook limitations
+
+Lefthook operates locally and can be bypassed.
+
+Some pushes that contain no matching file changes, such as remote branch deletion, can cause pre-push jobs to be skipped.
+
+GitHub Actions now defines the remote validation layer.
+
+Branch protection remains follow-up work and should only be enabled after the remote workflow has successfully executed and the final required check name is confirmed.
+
+## GitHub CI rollout
+
+The initial GitHub Actions CI rollout has completed successfully.
+
+Pull request `#4` produced a successful remote run across:
+
+- Linux x64
+- Linux ARM64
+- macOS ARM64
+- Windows x64
+- Windows ARM64 preview
+- Storybook Chromium validation
+- the final `CI Gate`
+
+The stable:
+
+```text
+CI Gate
+```
+
+check has therefore been observed successfully in a real pull request.
+
+The remaining CI-related work is:
+
+- configure branch protection using `CI Gate`
+- add Linux x64 musl validation
+- add Linux ARM64 musl validation
+- reevaluate Windows ARM64 enforcement when its runner is no longer treated as
+  preview infrastructure
+
+Windows ARM64 currently runs successfully but remains non-blocking.
+
+The absence of musl verification must remain visible in support documentation
+until dedicated musl CI jobs pass successfully.
+
+## Toolchain upgrade tracking
+
+The repository now uses a standardized Node.js and pnpm toolchain managed by mise.
+
+The current baseline is:
+
+```text
+Node.js 24.19.0 LTS
+pnpm 11.21.0 stable
+```
+
+Node.js 26 is deferred until it reaches LTS and passes cross-platform validation.
+
+pnpm 12 is deferred until it reaches stable status and passes the complete repository validation suite.
+
+The current pnpm 11 installation uses the mise `npm:pnpm` backend. Reevaluate the native backend after pnpm 12 becomes stable.
+
+pnpr has been evaluated but is deferred while it remains experimental and the repository does not require a private registry or server-side dependency acceleration.
+
+## Documentation deployment URL
+
+The Docusaurus configuration currently uses a placeholder production URL.
+
+Deployment configuration should update the URL when the documentation hosting target is selected.

@@ -1,0 +1,82 @@
+---
+title: Branching
+sidebar_position: 1
+---
+
+# Branching
+
+The repository uses a Git Flow-inspired branching model.
+
+## Long-lived branches
+
+### `main`
+
+Represents the stable production-oriented branch.
+
+### `develop`
+
+Represents the main development and integration branch.
+
+## Regular branch formats
+
+```text
+feat/<scope>/<slug>
+fix/<scope>/<slug>
+refactor/<scope>/<slug>
+docs/<scope>/<slug>
+test/<scope>/<slug>
+chore/<scope>/<slug>
+hotfix/<scope>/<slug>
+release/<version>
+```
+
+## Default base branches
+
+Most regular development branches are created from:
+
+```text
+develop
+```
+
+Hotfix branches default to:
+
+```text
+main
+```
+
+Release branches default to:
+
+```text
+develop
+```
+
+## Interactive branch creation
+
+Use:
+
+```bash
+pnpm branch
+```
+
+The branch wizard asks for:
+
+- branch type
+- scope
+- description
+- optional remote refresh
+- base branch
+- final confirmation
+
+Workspace scopes are discovered dynamically from repository applications and packages.
+
+Custom kebab-case scopes are also supported.
+
+## Validation
+
+Check the current branch manually:
+
+```bash
+pnpm branch:validate
+```
+
+The same validation runs through Git hooks.

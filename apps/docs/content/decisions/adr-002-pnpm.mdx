@@ -1,0 +1,23 @@
+---
+title: "ADR-002: Use pnpm Workspaces"
+sidebar_position: 3
+---
+
+# ADR-002: Use pnpm Workspaces
+
+**Status:** Accepted
+
+## Context
+
+The repository needs a package manager capable of managing multiple applications and reusable packages from a single lockfile.
+
+## Decision
+
+Use pnpm as the package manager and workspace manager.
+
+## Consequences
+
+- workspace packages are linked efficiently
+- dependency installation is centralized
+- internal packages can use the `workspace:*` protocol
+- a single lockfile represents the workspace dependency graph

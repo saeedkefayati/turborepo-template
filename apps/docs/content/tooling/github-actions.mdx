@@ -1,0 +1,596 @@
+---
+title: GitHub Actions
+description: "How the repository remote CI workflow validates code, toolchains, platforms, and Storybook."
+---
+
+# GitHub Actions
+
+The repository uses GitHub Actions as its remote continuous integration system.
+
+The workflow complements local Lefthook validation by running repository checks
+in clean GitHub-hosted environments.
+
+## Workflow location
+
+The primary workflow is:
+
+```text
+.github/workflows/ci.yml
+```
+
+## Current responsibilities
+
+The CI workflow validates:
+
+- locked toolchain installation
+- frozen dependency installation
+- formatting
+- ESLint
+- TypeScript
+- repository builds
+- multiple operating systems
+- multiple CPU architectures
+- Storybook browser tests
+- Storybook production builds
+
+The workflow also exposes a stable final result named:
+
+```text
+CI Gate
+```
+
+for future branch protection.
+
+## Triggers
+
+CI uses two execution tiers.
+
+### Fast CI
+
+Fast CI runs for pull requests targeting:
+
+```text
+develop
+```
+
+It runs the repository validation and Storybook browser checks on Ubuntu x64.
+
+### Full CI
+
+Full CI runs for:
+
+```text
+pull requests targeting main
+pushes to main
+workflow_dispatch
+```
+
+Pushes to `develop` do not trigger another CI run after a pull request is
+merged.
+
+This avoids duplicating the same repository validation immediately after a
+successful pull request.
+
+The workflow remains configured for both `develop` and `main` pull requests so
+the stable `CI Gate` check can be used consistently.
+
+## Toolchain
+
+GitHub Actions must use the repository's existing mise toolchain contract.
+
+The relevant files are:
+
+```text
+mise.toml
+mise.lock
+package.json
+pnpm-workspace.yaml
+```
+
+Current repository versions are:
+
+```text
+mise minimum version: 2026.8.5
+Node.js:              24.19.0
+pnpm:                 11.21.0
+```
+
+CI must not independently choose different Node.js or pnpm versions.
+
+The workflow uses `jdx/mise-action` to activate the same locked toolchain used by
+developers.
+
+## Action pins
+
+External Actions are pinned by full commit SHA.
+
+Current pins:
+
+| Action             | Release  | Commit                                     |
+| ------------------ | -------- | ------------------------------------------ |
+| `actions/checkout` | `v7.0.1` | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
+| `jdx/mise-action`  | `v4.2.5` | `3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518` |
+
+Keep the release comment next to each SHA:
+
+```yaml
+uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+```
+
+Do not replace full-SHA pins with floating major-version references such as:
+
+```text
+actions/checkout@v7
+jdx/mise-action@v4
+```
+
+without intentionally changing the repository security policy.
+
+## Native validation matrix
+
+The required native matrix currently includes:
+
+| Name        | Runner             | Architecture | Required |
+| ----------- | ------------------ | ------------ | -------- |
+| Linux x64   | `ubuntu-24.04`     | x64          | Yes      |
+| Linux ARM64 | `ubuntu-24.04-arm` | ARM64        | Yes      |
+| macOS ARM64 | `macos-26`         | ARM64        | Yes      |
+| Windows x64 | `windows-2025`     | x64          | Yes      |
+
+Each environment runs:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm format:check
+pnpm lint
+pnpm check-types
+pnpm build
+```
+
+The matrix uses:
+
+```yaml
+strategy:
+  fail-fast: false
+```
+
+This allows other platforms to finish even after one matrix entry fails.
+
+## Windows ARM64
+
+Windows ARM64 currently runs as a separate preview job:
+
+```text
+Preview / Windows ARM64
+```
+
+Runner:
+
+```text
+windows-11-arm
+```
+
+The job currently uses:
+
+```yaml
+continue-on-error: true
+```
+
+Its result is therefore informational and does not currently block `CI Gate`.
+
+The target remains part of the repository cross-platform plan.
+
+Its enforcement level should be reevaluated when the hosted runner is ready to
+be relied on as a required merge condition.
+
+## Storybook browser validation
+
+Browser validation is intentionally separated from the full native matrix.
+
+The UI job is:
+
+```text
+UI / Storybook Chromium
+```
+
+It runs on:
+
+```text
+ubuntu-24.04
+```
+
+and installs Chromium with:
+
+```bash
+pnpm --filter @repo/ui exec playwright install --with-deps chromium
+```
+
+It then runs the repository test contract:
+
+```bash
+pnpm test
+```
+
+The Storybook production build is not repeated in this dedicated browser job.
+
+It is already part of:
+
+```bash
+pnpm build
+```
+
+which runs in the Full CI native matrix.
+
+Browser tests are not currently duplicated across every operating system.
+
+If a future product requirement depends on browser behavior that differs by
+operating system, this policy can be expanded.
+
+## CI Gate
+
+The final required aggregation job is:
+
+```text
+CI Gate
+```
+
+Its required inputs depend on the CI tier.
+
+For pull requests targeting `develop`:
+
+```text
+Fast / Ubuntu x64
+        |
+        v
+     CI Gate
+```
+
+For Full CI:
+
+```text
+Native matrix
+      |
+      +------+
+             |
+UI / Storybook Chromium
+             |
+             v
+          CI Gate
+```
+
+Windows ARM64 remains intentionally excluded from the required gate while its
+runner is treated as preview infrastructure.
+
+The expected branch-protection contract remains:
+
+```text
+Required status check:
+CI Gate
+```
+
+The stable gate name allows the internal CI topology to evolve without requiring
+branch-protection rules to depend on individual matrix-generated job names.
+
+The gate uses `always()` so it still executes after required dependencies fail
+or tier-specific jobs are intentionally skipped.
+
+## Local equivalents
+
+Before pushing, developers can run the complete repository validation locally:
+
+```bash
+pnpm verify
+```
+
+The equivalent primary quality contract is:
+
+```text
+format:check
+lint
+check-types
+test
+build
+```
+
+Targeted UI commands remain available for focused development:
+
+```bash
+pnpm --filter @repo/ui test
+pnpm --filter @repo/ui build-storybook
+```
+
+The local environment does not replace the cross-platform CI matrix.
+
+For example, passing the checks on macOS ARM64 does not prove the repository
+also works on Windows or Linux.
+
+## Dependency installation policy
+
+CI always uses:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+CI should fail rather than regenerate dependency resolution.
+
+If the lockfile must change, update it intentionally in development and commit
+the result.
+
+## Workflow permissions
+
+The CI workflow currently requests:
+
+```yaml
+permissions:
+  contents: read
+```
+
+Validation jobs should remain read-only unless a future requirement explicitly
+needs additional GitHub permissions.
+
+Do not broaden workflow permissions merely for convenience.
+
+## Checkout credentials
+
+Repository checkout uses:
+
+```yaml
+persist-credentials: false
+```
+
+The CI validation steps do not need checkout credentials to remain persisted
+after the repository has been cloned.
+
+## Concurrency
+
+The workflow configures:
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+If a newer workflow run supersedes an older one for the same Git reference, the
+older run can be cancelled.
+
+This avoids spending runner time validating commits that are no longer the
+latest version of a pull request or branch.
+
+## Timeouts
+
+Current limits:
+
+| Job                   | Timeout    |
+| --------------------- | ---------- |
+| Native matrix         | 30 minutes |
+| Windows ARM64 preview | 30 minutes |
+| Storybook Chromium    | 30 minutes |
+| CI Gate               | 5 minutes  |
+
+If these values are changed, use real workflow execution data rather than
+arbitrary increases.
+
+## mise cache
+
+The workflow enables caching through `jdx/mise-action`.
+
+This is toolchain setup caching.
+
+It should not be confused with a future Turborepo remote cache strategy.
+
+Turborepo remote caching remains a separate infrastructure decision.
+
+## musl status
+
+The repository cross-platform contract includes:
+
+```text
+Linux x64 musl
+Linux ARM64 musl
+```
+
+The initial GitHub Actions workflow does not yet verify those environments.
+
+They must remain documented as targeted rather than CI verified until dedicated
+musl jobs successfully execute.
+
+The planned validation environment should use an actual musl userspace such as
+Alpine or an equivalent deliberate strategy.
+
+Do not infer musl compatibility merely from a successful Ubuntu run.
+
+## Relationship to Lefthook
+
+Local and remote validation are complementary:
+
+| Layer             | Purpose                                            |
+| ----------------- | -------------------------------------------------- |
+| Lefthook          | Fast feedback before local commits and pushes      |
+| GitHub Actions    | Independent remote and cross-platform verification |
+| Branch protection | Enforce successful remote validation before merge  |
+
+Where possible, all layers should invoke repository-owned scripts.
+
+For example:
+
+```text
+pnpm format:check
+pnpm lint
+pnpm check-types
+pnpm test
+pnpm build
+```
+
+are preferable to duplicating their implementation directly in workflow YAML.
+
+## Investigating CI failures
+
+Start by checking which job failed.
+
+The important job groups are:
+
+```text
+Native / Linux x64
+Native / Linux ARM64
+Native / macOS ARM64
+Native / Windows x64
+Preview / Windows ARM64
+UI / Storybook Chromium
+CI Gate
+```
+
+A native platform failure should be treated as a compatibility signal rather
+than immediately weakening or removing that platform from CI.
+
+First determine whether the failure comes from:
+
+- toolchain installation
+- dependency lifecycle scripts
+- filesystem path handling
+- shell differences
+- line endings
+- native optional dependencies
+- TypeScript or build behavior
+- runner-specific infrastructure
+
+## Using GitHub CLI
+
+Recent workflow runs can be listed with:
+
+```bash
+gh run list --workflow=ci.yml
+```
+
+Inspect a specific run:
+
+```bash
+gh run view <run-id>
+```
+
+Inspect failed logs:
+
+```bash
+gh run view <run-id> --log-failed
+```
+
+Watch a running workflow:
+
+```bash
+gh run watch <run-id>
+```
+
+The GitHub web interface remains useful for matrix visualization, annotations,
+and individual step logs.
+
+## Updating Action dependencies
+
+Action dependencies must be upgraded deliberately.
+
+For example, resolve a release tag to the exact commit SHA:
+
+```bash
+CHECKOUT_SHA="$(gh api repos/actions/checkout/commits/<version> --jq '.sha')"
+echo "$CHECKOUT_SHA"
+```
+
+For mise-action:
+
+```bash
+MISE_SHA="$(gh api repos/jdx/mise-action/commits/<version> --jq '.sha')"
+echo "$MISE_SHA"
+```
+
+Then:
+
+1. verify the release
+2. review release notes and relevant changes
+3. replace the full SHA
+4. update the adjacent version comment
+5. run local validation
+6. push the branch
+7. verify GitHub Actions before merging
+
+## Adding a required platform
+
+Before adding a platform to the required matrix:
+
+1. confirm that the runner is available for the repository
+2. confirm that mise supports the target
+3. confirm that the target exists in `mise.lock` when platform locking applies
+4. run the full repository validation
+5. observe at least one successful GitHub Actions execution
+6. update cross-platform support documentation
+7. add it to `CI Gate` if it should block merges
+
+A platform must not be labeled CI verified before successful execution exists.
+
+## Removing a platform
+
+Do not remove a failing platform simply to make CI green.
+
+Removal is appropriate only when the repository support policy itself changes.
+
+A support-policy change should be documented separately and may require an ADR.
+
+## Branch protection
+
+Branch protection is a follow-up step after the CI workflow is proven stable.
+
+The intended progression is:
+
+```text
+CI implementation
+      |
+      v
+successful remote runs
+      |
+      v
+stable CI Gate
+      |
+      v
+branch protection
+      |
+      v
+CI Gate required for merge
+```
+
+This prevents repository rules from depending on workflow names that have not
+yet been validated.
+
+## Initial remote verification
+
+The first pull request execution of the workflow completed successfully.
+
+Observed successful checks:
+
+```text
+Native / Linux x64
+Native / Linux ARM64
+Native / macOS ARM64
+Native / Windows x64
+Preview / Windows ARM64
+UI / Storybook Chromium
+CI Gate
+```
+
+This confirms that the configured native environments can bootstrap the locked
+mise toolchain, install dependencies, and execute their configured repository
+validation successfully.
+
+Windows ARM64 also passed, but remains informational because its current
+enforcement policy is non-blocking.
+
+The successful native Linux jobs do not verify musl compatibility.
+
+## Current follow-up work
+
+After the successful initial CI run:
+
+- configure branch protection around the confirmed `CI Gate`
+- add Linux x64 musl validation
+- add Linux ARM64 musl validation
+- reevaluate Windows ARM64 as a required job when appropriate
+- evaluate dependency update automation
+- evaluate Turborepo remote caching later

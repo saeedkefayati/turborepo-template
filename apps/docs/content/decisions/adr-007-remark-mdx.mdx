@@ -1,0 +1,43 @@
+---
+title: "ADR-007: Use Remark for MDX Formatting"
+sidebar_position: 8
+---
+
+# ADR-007: Use Remark for MDX Formatting
+
+**Status:** Accepted
+
+## Context
+
+The documentation application uses Docusaurus and MDX v3.
+
+Prettier is the repository-wide formatter, but Docusaurus MDX content requires tooling that understands the current MDX syntax and its Markdown extensions.
+
+## Decision
+
+Continue using Prettier as the primary formatter for regular repository files.
+
+Exclude Docusaurus MDX content from Prettier:
+
+```text
+apps/docs/content/**/*.mdx
+```
+
+Use Remark with MDX-aware plugins to format and validate documentation content.
+
+Integrate both formatters behind the root commands:
+
+```bash
+pnpm format
+pnpm format:check
+```
+
+Integrate Remark with the Git quality gates for staged MDX validation and formatting.
+
+## Consequences
+
+- regular source files continue using the existing Prettier workflow
+- MDX content is handled by MDX-aware tooling
+- developers continue using a single repository-level formatting interface
+- documentation syntax and style are validated automatically
+- additional Remark plugins can be introduced later when documentation requirements grow

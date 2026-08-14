@@ -1,0 +1,138 @@
+---
+title: Local Development
+sidebar_position: 3
+---
+
+# Local Development
+
+The repository uses pnpm workspaces and Turborepo to coordinate applications and
+shared packages.
+
+mise provides the Node.js and pnpm toolchain.
+
+## Start the entire repository
+
+```bash
+pnpm dev
+```
+
+Current development services:
+
+```text
+web        http://localhost:3000
+docs       http://localhost:3001
+Storybook  http://localhost:6006
+```
+
+## Start individual workspaces
+
+Web application:
+
+```bash
+pnpm --filter web dev
+```
+
+Documentation:
+
+```bash
+pnpm --filter docs dev
+```
+
+Storybook:
+
+```bash
+pnpm --filter @repo/ui dev
+```
+
+## Daily workflow
+
+Once the repository toolchain has been installed, normal development uses pnpm
+directly.
+
+```bash
+pnpm dev
+pnpm format
+pnpm lint
+pnpm check-types
+pnpm test
+pnpm build
+```
+
+For one complete validation pass:
+
+```bash
+pnpm verify
+```
+
+mise does not replace these commands.
+
+Use mise when bootstrapping or updating the project toolchain:
+
+```bash
+mise install --locked
+```
+
+## Adding dependencies
+
+Add an application dependency to the workspace that owns it.
+
+Web:
+
+```bash
+pnpm --filter web add <package>
+```
+
+Documentation:
+
+```bash
+pnpm --filter docs add <package>
+```
+
+UI package:
+
+```bash
+pnpm --filter @repo/ui add <package>
+```
+
+Add a development dependency:
+
+```bash
+pnpm --filter web add -D <package>
+```
+
+Add a repository-level development tool:
+
+```bash
+pnpm add -Dw <package>
+```
+
+Remove a dependency from a workspace:
+
+```bash
+pnpm --filter web remove <package>
+```
+
+Do not manually edit `pnpm-lock.yaml`.
+
+## Validation
+
+Before pushing substantial changes, run:
+
+```bash
+pnpm verify
+git diff --check
+```
+
+The repository contracts mean that UI validation does not require separate
+Storybook-specific commands.
+
+For targeted UI work, the corresponding workspace commands remain available:
+
+```bash
+pnpm --filter @repo/ui test
+pnpm --filter @repo/ui build-storybook
+```
+
+Git hooks provide additional local validation.
+
+GitHub Actions independently reproduces the critical quality gates remotely.
