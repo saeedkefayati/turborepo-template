@@ -167,3 +167,27 @@ export const BidirectionalLabels: Story = {
     ).toBeChecked();
   },
 };
+
+export const ClassNameContract: Story = {
+  render: () => (
+    <Checkbox
+      aria-label="Class name checkbox"
+      className="test-checkbox-root"
+      inputClassName="test-checkbox-input"
+    />
+  ),
+
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole("checkbox", {
+      name: "Class name checkbox",
+    });
+
+    await expect(checkbox).toHaveClass("test-checkbox-input");
+
+    await expect(checkbox).not.toHaveClass("test-checkbox-root");
+
+    await expect(checkbox.parentElement).toHaveClass("test-checkbox-root");
+
+    await expect(checkbox.parentElement).not.toHaveClass("test-checkbox-input");
+  },
+};

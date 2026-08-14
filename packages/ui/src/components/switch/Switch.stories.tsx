@@ -208,3 +208,27 @@ export const BidirectionalLabels: Story = {
     await expect(persian.parentElement).toHaveAttribute("dir", "rtl");
   },
 };
+
+export const ClassNameContract: Story = {
+  render: () => (
+    <Switch
+      aria-label="Class name switch"
+      className="test-switch-root"
+      inputClassName="test-switch-input"
+    />
+  ),
+
+  play: async ({ canvas }) => {
+    const switchControl = canvas.getByRole("switch", {
+      name: "Class name switch",
+    });
+
+    await expect(switchControl).toHaveClass("test-switch-input");
+
+    await expect(switchControl).not.toHaveClass("test-switch-root");
+
+    await expect(switchControl.parentElement).toHaveClass("test-switch-root");
+
+    await expect(switchControl.parentElement).not.toHaveClass("test-switch-input");
+  },
+};

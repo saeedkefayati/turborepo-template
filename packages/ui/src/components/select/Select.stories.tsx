@@ -207,3 +207,32 @@ export const Bidirectional: Story = {
     await expect(persian.parentElement).toHaveAttribute("dir", "rtl");
   },
 };
+
+export const ClassNameContract: Story = {
+  render: () => (
+    <Select
+      aria-label="Class name select"
+      className="test-select-root"
+      selectClassName="test-select-native"
+      defaultValue="pro"
+    >
+      <option value="basic">Basic</option>
+
+      <option value="pro">Pro</option>
+    </Select>
+  ),
+
+  play: async ({ canvas }) => {
+    const select = canvas.getByRole("combobox", {
+      name: "Class name select",
+    });
+
+    await expect(select).toHaveClass("test-select-native");
+
+    await expect(select).not.toHaveClass("test-select-root");
+
+    await expect(select.parentElement).toHaveClass("test-select-root");
+
+    await expect(select.parentElement).not.toHaveClass("test-select-native");
+  },
+};

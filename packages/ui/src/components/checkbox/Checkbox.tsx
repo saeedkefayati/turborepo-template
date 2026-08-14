@@ -3,9 +3,11 @@ import { cn } from "@/lib/cn";
 import type { CheckboxProps } from "./Checkbox.types";
 import { checkboxVariants } from "./Checkbox.variants";
 
-export function Checkbox({ ref, className, controlSize, ...props }: CheckboxProps) {
+export function Checkbox({ ref, className, inputClassName, controlSize, ...props }: CheckboxProps) {
   return (
-    <span className="relative inline-flex size-6 shrink-0 items-center justify-center">
+    <span
+      className={cn("relative inline-flex size-6 shrink-0 items-center justify-center", className)}
+    >
       <input
         ref={ref}
         type="checkbox"
@@ -13,7 +15,7 @@ export function Checkbox({ ref, className, controlSize, ...props }: CheckboxProp
           "peer absolute inset-0 size-full cursor-pointer opacity-0",
           "focus-visible:outline-none",
           "disabled:cursor-not-allowed",
-          className,
+          inputClassName,
         )}
         {...props}
       />

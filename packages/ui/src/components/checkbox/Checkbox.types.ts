@@ -4,5 +4,8 @@ import type { VariantProps } from "class-variance-authority";
 
 import type { checkboxVariants } from "./Checkbox.variants";
 
-export type CheckboxProps = Omit<ComponentPropsWithRef<"input">, "type"> &
-  VariantProps<typeof checkboxVariants>;
+export type CheckboxProps = Omit<ComponentPropsWithRef<"input">, "type" | "className"> &
+  VariantProps<typeof checkboxVariants> & {
+    className?: string;
+    inputClassName?: string;
+  };

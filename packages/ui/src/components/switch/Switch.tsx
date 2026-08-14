@@ -3,9 +3,16 @@ import { cn } from "@/lib/cn";
 import type { SwitchProps } from "./Switch.types";
 import { switchVariants } from "./Switch.variants";
 
-export function Switch({ ref, className, controlSize, dir, ...props }: SwitchProps) {
+export function Switch({
+  ref,
+  className,
+  inputClassName,
+  controlSize,
+  dir,
+  ...props
+}: SwitchProps) {
   return (
-    <span dir={dir} className="relative inline-flex h-6 shrink-0 items-center">
+    <span dir={dir} className={cn("relative inline-flex h-6 shrink-0 items-center", className)}>
       <input
         ref={ref}
         type="checkbox"
@@ -15,7 +22,7 @@ export function Switch({ ref, className, controlSize, dir, ...props }: SwitchPro
           "peer absolute inset-0 size-full cursor-pointer opacity-0",
           "focus-visible:outline-none",
           "disabled:cursor-not-allowed",
-          className,
+          inputClassName,
         )}
         {...props}
       />

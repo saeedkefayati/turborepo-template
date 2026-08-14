@@ -231,3 +231,27 @@ export const BidirectionalLabels: Story = {
     ).toBeChecked();
   },
 };
+
+export const ClassNameContract: Story = {
+  render: () => (
+    <Radio
+      aria-label="Class name radio"
+      className="test-radio-root"
+      inputClassName="test-radio-input"
+    />
+  ),
+
+  play: async ({ canvas }) => {
+    const radio = canvas.getByRole("radio", {
+      name: "Class name radio",
+    });
+
+    await expect(radio).toHaveClass("test-radio-input");
+
+    await expect(radio).not.toHaveClass("test-radio-root");
+
+    await expect(radio.parentElement).toHaveClass("test-radio-root");
+
+    await expect(radio.parentElement).not.toHaveClass("test-radio-input");
+  },
+};

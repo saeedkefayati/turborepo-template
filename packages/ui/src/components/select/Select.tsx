@@ -3,9 +3,17 @@ import { cn } from "@/lib/cn";
 import type { SelectProps } from "./Select.types";
 import { selectVariants } from "./Select.variants";
 
-export function Select({ ref, className, controlSize, children, dir, ...props }: SelectProps) {
+export function Select({
+  ref,
+  className,
+  selectClassName,
+  controlSize,
+  children,
+  dir,
+  ...props
+}: SelectProps) {
   return (
-    <span dir={dir} className="relative inline-flex w-full">
+    <span dir={dir} className={cn("relative inline-flex w-full", className)}>
       <select
         ref={ref}
         dir={dir}
@@ -13,7 +21,7 @@ export function Select({ ref, className, controlSize, children, dir, ...props }:
           selectVariants({
             controlSize,
           }),
-          className,
+          selectClassName,
         )}
         {...props}
       >
