@@ -526,19 +526,45 @@ assumptions.
 - musl coverage requires additional CI work.
 - Action dependency SHAs require deliberate maintenance.
 
+## Implementation verification
+
+The initial implementation was verified through GitHub Actions on pull request
+`#4`.
+
+The first observed remote CI run completed successfully across all configured
+jobs:
+
+```text
+Native / Linux x64
+Native / Linux ARM64
+Native / macOS ARM64
+Native / Windows x64
+Preview / Windows ARM64
+UI / Storybook Chromium
+CI Gate
+```
+
+All seven checks completed successfully.
+
+This confirms the initial CI architecture, native matrix, Storybook browser job,
+and stable `CI Gate` behavior in a real pull request environment.
+
+Windows ARM64 also completed successfully, but its non-blocking preview policy
+remains unchanged.
+
+The successful run does not verify the remaining musl targets.
+
 ## Follow-up work
 
-After the initial workflow is pushed:
+The remaining follow-up work is:
 
-1. Observe the first real GitHub Actions execution.
-2. Fix platform-specific failures without weakening the intended validation.
-3. Confirm stable job and check names.
-4. Update cross-platform support documentation with actual CI results.
-5. Add Linux x64 musl validation.
-6. Add Linux ARM64 musl validation.
-7. Reevaluate Windows ARM64 enforcement.
-8. Configure branch protection and require `CI Gate`.
-9. Continue with security and dependency remediation after the CI trust boundary
+1. Configure branch protection using the confirmed `CI Gate` check.
+2. Add Linux x64 musl validation.
+3. Add Linux ARM64 musl validation.
+4. Reevaluate Windows ARM64 enforcement when runner maturity permits it.
+5. Keep the support matrix synchronized with observed CI results.
+6. Continue with repository quality-gate consolidation.
+7. Continue with security and dependency remediation after the CI trust boundary
    is established.
 
 ## Supersession

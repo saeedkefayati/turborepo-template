@@ -29,32 +29,53 @@ A platform should only be described as fully CI-verified after the remote CI mat
 
 ## Current CI verification state
 
-The GitHub Actions workflow is configured to exercise the following native environments:
+The initial GitHub Actions cross-platform workflow has successfully executed on
+the repository's pull request CI.
 
-| Environment       | CI configuration   | Enforcement            |
-| ----------------- | ------------------ | ---------------------- |
-| Linux x64 glibc   | `ubuntu-24.04`     | Required               |
-| Linux ARM64 glibc | `ubuntu-24.04-arm` | Required               |
-| macOS ARM64       | `macos-26`         | Required               |
-| Windows x64       | `windows-2025`     | Required               |
-| Windows ARM64     | `windows-11-arm`   | Preview / non-blocking |
-| Linux x64 musl    | Not yet configured | Pending                |
-| Linux ARM64 musl  | Not yet configured | Pending                |
+The currently observed native CI state is:
 
-The workflow configuration alone does not make these platforms CI-verified.
+| Environment       | Runner             | CI status           | Enforcement  |
+| ----------------- | ------------------ | ------------------- | ------------ |
+| Linux x64 glibc   | `ubuntu-24.04`     | Verified            | Required     |
+| Linux ARM64 glibc | `ubuntu-24.04-arm` | Verified            | Required     |
+| macOS ARM64       | `macos-26`         | Verified            | Required     |
+| Windows x64       | `windows-2025`     | Verified            | Required     |
+| Windows ARM64     | `windows-11-arm`   | Verified in preview | Non-blocking |
+| Linux x64 musl    | Not yet configured | Pending             | Not required |
+| Linux ARM64 musl  | Not yet configured | Pending             | Not required |
 
-A platform becomes CI-verified only after a successful remote GitHub Actions run has been observed for that environment.
+The first successful remote matrix execution was observed on pull request
+`#4`.
 
-Until the initial workflow has successfully executed, the repository should treat the configured native environments as:
+The required native matrix and Storybook browser validation completed
+successfully, and the final:
 
 ```text
-CI configured
-verification pending
+CI Gate
 ```
 
-Windows ARM64 remains part of the target support matrix, but its current GitHub-hosted runner is treated as preview infrastructure and is therefore not yet a required merge condition.
+also completed successfully.
 
-Dedicated musl validation remains follow-up work.
+Windows ARM64 successfully completed the same repository validation during the
+initial run.
+
+However, its hosted runner is still treated as preview infrastructure, so the
+job remains non-blocking and is not currently part of `CI Gate`.
+
+The successful Windows ARM64 run demonstrates current compatibility but does not
+change its temporary enforcement policy.
+
+Linux musl support remains targeted but is not yet CI verified.
+
+Dedicated validation is still required for:
+
+```text
+Linux x64 musl
+Linux ARM64 musl
+```
+
+A successful glibc-based Ubuntu run must not be interpreted as proof of musl
+compatibility.
 
 ## Linux runtime families
 

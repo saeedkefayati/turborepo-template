@@ -517,19 +517,39 @@ CI Gate required for merge
 This prevents repository rules from depending on workflow names that have not
 yet been validated.
 
+## Initial remote verification
+
+The first pull request execution of the workflow completed successfully.
+
+Observed successful checks:
+
+```text
+Native / Linux x64
+Native / Linux ARM64
+Native / macOS ARM64
+Native / Windows x64
+Preview / Windows ARM64
+UI / Storybook Chromium
+CI Gate
+```
+
+This confirms that the configured native environments can bootstrap the locked
+mise toolchain, install dependencies, and execute their configured repository
+validation successfully.
+
+Windows ARM64 also passed, but remains informational because its current
+enforcement policy is non-blocking.
+
+The successful native Linux jobs do not verify musl compatibility.
+
 ## Current follow-up work
 
-After the initial CI workflow is running successfully:
+After the successful initial CI run:
 
-- update cross-platform support with observed CI results
+- configure branch protection around the confirmed `CI Gate`
 - add Linux x64 musl validation
 - add Linux ARM64 musl validation
-- reevaluate Windows ARM64 as a required job
-- configure branch protection
-- require `CI Gate`
-- begin security and dependency remediation
+- reevaluate Windows ARM64 as a required job when appropriate
+- consolidate repository test and quality commands
 - evaluate dependency update automation
 - evaluate Turborepo remote caching later
-
-For the architectural rationale behind this workflow, see
-[ADR-009: GitHub Actions CI](../decisions/adr-009-github-actions-ci.mdx).

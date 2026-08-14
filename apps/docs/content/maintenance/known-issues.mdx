@@ -63,36 +63,38 @@ Branch protection remains follow-up work and should only be enabled after the re
 
 ## GitHub CI rollout
 
-The repository now defines:
+The initial GitHub Actions CI rollout has completed successfully.
+
+Pull request `#4` produced a successful remote run across:
+
+- Linux x64
+- Linux ARM64
+- macOS ARM64
+- Windows x64
+- Windows ARM64 preview
+- Storybook Chromium validation
+- the final `CI Gate`
+
+The stable:
 
 ```text
-.github/workflows/ci.yml
+CI Gate
 ```
 
-The workflow provides remote validation for:
+check has therefore been observed successfully in a real pull request.
 
-- frozen dependency installation
-- formatting
-- linting
-- type checking
-- repository builds
-- native Linux, macOS, and Windows environments
-- Storybook browser tests
-- Storybook production builds
+The remaining CI-related work is:
 
-The current rollout is not yet considered complete.
+- configure branch protection using `CI Gate`
+- add Linux x64 musl validation
+- add Linux ARM64 musl validation
+- reevaluate Windows ARM64 enforcement when its runner is no longer treated as
+  preview infrastructure
 
-Before CI is described as authoritative repository enforcement:
+Windows ARM64 currently runs successfully but remains non-blocking.
 
-1. the workflow must be pushed to GitHub
-2. a pull request run must execute successfully
-3. platform-specific failures must be resolved
-4. the stable `CI Gate` check name must be confirmed
-5. branch protection must be configured separately
-
-Linux musl validation remains pending dedicated CI implementation.
-
-Windows ARM64 currently runs as preview, non-blocking validation.
+The absence of musl verification must remain visible in support documentation
+until dedicated musl CI jobs pass successfully.
 
 ## Toolchain upgrade tracking
 
