@@ -85,7 +85,7 @@ function Typography() {
     <main className="bg-background text-foreground min-h-screen p-8">
       <div className="mx-auto max-w-6xl">
         <header className="mb-10 space-y-3">
-          <p className="text-label text-primary">Design System</p>
+          <p className="text-label text-accent-foreground">Design System</p>
 
           <h1 className="font-display text-heading">Typography Foundations</h1>
 

@@ -91,7 +91,7 @@ function Shadows() {
     <main className="bg-background text-foreground min-h-screen p-8">
       <div className="mx-auto max-w-6xl space-y-14">
         <header className="space-y-3">
-          <p className="text-label text-primary">Design System</p>
+          <p className="text-label text-accent-foreground">Design System</p>
 
           <h1 className="font-display text-heading">Shadow & Elevation Foundations</h1>
 

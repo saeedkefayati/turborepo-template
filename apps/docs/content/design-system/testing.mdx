@@ -22,14 +22,80 @@ For targeted UI development, run:
 pnpm --filter @repo/ui test
 ```
 
+## Browser-based component tests
+
 Story interactions validate externally observable component behavior in a real
 browser environment.
+
+Tests cover behavior such as:
+
+- user interaction
+- keyboard behavior
+- native control state
+- accessible relationships
+- form-control grouping
+- RTL and LTR behavior
+- component API contracts
+
+Regression tests should focus on public behavior rather than internal
+implementation details.
+
+## Accessibility
+
+Storybook accessibility checks are part of the design-system validation
+workflow.
+
+Accessibility violations are configured to fail Storybook tests instead of
+being reported only as advisory output.
+
+Automated checks complement, but do not replace, manual accessibility review.
+
+Manual QA should still include areas such as:
+
+- keyboard navigation
+- visible focus
+- contrast
+- control states
+- screen-reader semantics
+- RTL and LTR presentation
+- reduced-motion behavior
+
+## Static validation
+
+The UI package also participates in:
+
+```text
+TypeScript
+ESLint
+Prettier
+```
+
+These checks validate type safety, repository conventions, and source
+formatting before browser tests run.
+
+## Git hooks and CI
 
 The pre-commit hook conditionally runs the targeted UI test task when matching
 UI files are staged.
 
-The pre-push and remote CI layers consume the repository-wide `pnpm test`
+The pre-push and remote CI layers consume the repository-wide:
+
+```bash
+pnpm test
+```
+
 contract.
 
 Future workspace test suites can participate by defining their own `test` task
 without changing the root command.
+
+## Additional testing layers
+
+Component browser tests are the primary test layer for the current design
+system.
+
+Standalone application-level end-to-end tests should be added for complete
+product workflows rather than duplicating component stories.
+
+Visual regression testing can be introduced separately when screenshot-based
+coverage becomes valuable for detecting visual-only regressions.

@@ -20,7 +20,69 @@ Storybook is used to:
 - document supported component variants
 - validate component behavior
 - run browser-based story tests
+- perform accessibility checks
+- review RTL and LTR behavior
+- review light and dark themes
 - produce a static design-system build
+
+## Story organization
+
+The current Storybook hierarchy includes:
+
+```text
+Foundations
+Primitives
+Form Controls
+```
+
+General-purpose controls such as `Button` belong to `Primitives`.
+
+Form-specific elements such as inputs, selection controls, labels, and field
+composition belong to `Form Controls`.
+
+Additional categories should be introduced only when the component inventory
+justifies them.
+
+## Environment controls
+
+Storybook provides global environment controls for theme and direction.
+
+### Theme
+
+Supported theme modes are:
+
+```text
+System
+Light
+Dark
+```
+
+The design-system DOM receives only the resolved theme:
+
+```text
+data-theme="light"
+data-theme="dark"
+```
+
+System preference resolution belongs to the environment layer rather than
+individual components.
+
+### Direction
+
+Stories can be previewed globally in:
+
+```text
+LTR
+RTL
+```
+
+Components inherit document direction by default.
+
+Stories may also set an explicit local `dir` when validating nested or mixed
+direction scenarios.
+
+These controls allow the same component story to be reviewed without creating
+duplicate theme- or direction-specific stories.
 
 ## Development server
 
@@ -44,6 +106,16 @@ For targeted Storybook development:
 ```bash
 pnpm --filter @repo/ui dev
 ```
+
+## Browser tests
+
+Storybook stories participate in Vitest browser testing through Chromium.
+
+Interaction tests use Storybook's test utilities to validate public component
+behavior.
+
+Accessibility checks are configured as test failures so violations are part of
+the quality gate.
 
 ## Production build
 

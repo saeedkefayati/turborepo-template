@@ -10,15 +10,27 @@
   --ds-surface-elevated: var(--color-white);
 
   --ds-muted-foreground: var(--color-zinc-500);
+  --ds-accent-foreground: var(--color-violet-700);
 
+  /* Decorative structure */
   --ds-border: var(--color-zinc-200);
 
+  /* Interactive component boundaries */
+  --ds-control-border: var(--color-zinc-500);
+
+  /* Keyboard focus */
+  --ds-focus: var(--color-violet-600);
+
+  /* Primary actions */
   --ds-primary: var(--color-violet-600);
-  --ds-primary-hover: var(--color-violet-500);
+  --ds-primary-hover: var(--color-violet-700);
   --ds-primary-foreground: var(--color-white);
 
+  /* Destructive actions and validation */
   --ds-danger: var(--color-red-600);
+  --ds-danger-hover: var(--color-red-700);
   --ds-danger-foreground: var(--color-white);
+  --ds-danger-text: var(--color-red-700);
 }
 
 [data-theme="dark"] {
@@ -32,13 +44,25 @@
   --ds-surface-elevated: var(--color-zinc-900);
 
   --ds-muted-foreground: var(--color-zinc-400);
+  --ds-accent-foreground: var(--color-violet-400);
 
+  /* Decorative structure */
   --ds-border: var(--color-zinc-800);
 
+  /* Interactive component boundaries */
+  --ds-control-border: var(--color-zinc-500);
+
+  /* Keyboard focus */
+  --ds-focus: var(--color-violet-400);
+
+  /* Primary actions */
   --ds-primary: var(--color-violet-600);
-  --ds-primary-hover: var(--color-violet-500);
+  --ds-primary-hover: var(--color-violet-700);
   --ds-primary-foreground: var(--color-white);
 
-  --ds-danger: var(--color-red-500);
+  /* Destructive actions and validation */
+  --ds-danger: var(--color-red-600);
+  --ds-danger-hover: var(--color-red-700);
   --ds-danger-foreground: var(--color-white);
+  --ds-danger-text: var(--color-red-500);
 }
