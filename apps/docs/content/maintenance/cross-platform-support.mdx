@@ -27,6 +27,56 @@ These entries describe the intended support matrix.
 
 A platform should only be described as fully CI-verified after the remote CI matrix successfully validates it.
 
+## Current CI verification state
+
+The initial GitHub Actions cross-platform workflow has successfully executed on
+the repository's pull request CI.
+
+The currently observed native CI state is:
+
+| Environment       | Runner             | CI status           | Enforcement  |
+| ----------------- | ------------------ | ------------------- | ------------ |
+| Linux x64 glibc   | `ubuntu-24.04`     | Verified            | Required     |
+| Linux ARM64 glibc | `ubuntu-24.04-arm` | Verified            | Required     |
+| macOS ARM64       | `macos-26`         | Verified            | Required     |
+| Windows x64       | `windows-2025`     | Verified            | Required     |
+| Windows ARM64     | `windows-11-arm`   | Verified in preview | Non-blocking |
+| Linux x64 musl    | Not yet configured | Pending             | Not required |
+| Linux ARM64 musl  | Not yet configured | Pending             | Not required |
+
+The first successful remote matrix execution was observed on pull request
+`#4`.
+
+The required native matrix and Storybook browser validation completed
+successfully, and the final:
+
+```text
+CI Gate
+```
+
+also completed successfully.
+
+Windows ARM64 successfully completed the same repository validation during the
+initial run.
+
+However, its hosted runner is still treated as preview infrastructure, so the
+job remains non-blocking and is not currently part of `CI Gate`.
+
+The successful Windows ARM64 run demonstrates current compatibility but does not
+change its temporary enforcement policy.
+
+Linux musl support remains targeted but is not yet CI verified.
+
+Dedicated validation is still required for:
+
+```text
+Linux x64 musl
+Linux ARM64 musl
+```
+
+A successful glibc-based Ubuntu run must not be interpreted as proof of musl
+compatibility.
+
 ## Linux runtime families
 
 Linux support is defined by CPU architecture and C runtime rather than by individual distribution names.
