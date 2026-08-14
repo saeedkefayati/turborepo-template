@@ -27,6 +27,35 @@ These entries describe the intended support matrix.
 
 A platform should only be described as fully CI-verified after the remote CI matrix successfully validates it.
 
+## Current CI verification state
+
+The GitHub Actions workflow is configured to exercise the following native environments:
+
+| Environment       | CI configuration   | Enforcement            |
+| ----------------- | ------------------ | ---------------------- |
+| Linux x64 glibc   | `ubuntu-24.04`     | Required               |
+| Linux ARM64 glibc | `ubuntu-24.04-arm` | Required               |
+| macOS ARM64       | `macos-26`         | Required               |
+| Windows x64       | `windows-2025`     | Required               |
+| Windows ARM64     | `windows-11-arm`   | Preview / non-blocking |
+| Linux x64 musl    | Not yet configured | Pending                |
+| Linux ARM64 musl  | Not yet configured | Pending                |
+
+The workflow configuration alone does not make these platforms CI-verified.
+
+A platform becomes CI-verified only after a successful remote GitHub Actions run has been observed for that environment.
+
+Until the initial workflow has successfully executed, the repository should treat the configured native environments as:
+
+```text
+CI configured
+verification pending
+```
+
+Windows ARM64 remains part of the target support matrix, but its current GitHub-hosted runner is treated as preview infrastructure and is therefore not yet a required merge condition.
+
+Dedicated musl validation remains follow-up work.
+
 ## Linux runtime families
 
 Linux support is defined by CPU architecture and C runtime rather than by individual distribution names.

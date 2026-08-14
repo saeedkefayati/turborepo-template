@@ -9,6 +9,10 @@ The high-level repository structure is:
 
 ```text
 .
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
 ├── apps/
 │   ├── docs/
 │   └── web/
@@ -34,6 +38,18 @@ The high-level repository structure is:
 ├── turbo.json
 └── pnpm-lock.yaml
 ```
+
+## `.github/`
+
+Contains GitHub-hosted repository automation.
+
+The primary workflow is:
+
+```text
+.github/workflows/ci.yml
+```
+
+It provides remote validation for repository changes and is intended to become the trust boundary used by branch protection after the workflow has been proven stable.
 
 ## `apps/`
 

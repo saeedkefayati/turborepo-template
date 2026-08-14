@@ -1,0 +1,548 @@
+---
+title: "ADR-009: GitHub Actions CI"
+description: "Adopt GitHub Actions as the repository remote CI system and define its initial cross-platform validation policy."
+---
+
+# ADR-009: GitHub Actions CI
+
+## Status
+
+Accepted
+
+## Date
+
+2026-08-14
+
+## Context
+
+The repository already has strong local quality gates through Lefthook and
+project scripts.
+
+Local validation currently covers areas such as:
+
+- branch policy validation
+- formatting
+- linting
+- TypeScript checks
+- Storybook browser tests
+- Storybook production builds
+
+Local hooks are useful developer safeguards, but they are not a remote trust
+boundary.
+
+A contributor can have:
+
+- different local tooling
+- hooks disabled
+- an incomplete environment
+- platform-specific behavior that is not visible on another operating system
+
+The repository also defines a cross-platform toolchain contract through:
+
+- `mise.toml`
+- `mise.lock`
+- Node.js `24.19.0`
+- pnpm `11.21.0`
+
+The next infrastructure requirement is therefore a reproducible remote CI
+system that validates repository changes independently of the contributor's
+machine.
+
+## Decision
+
+Use GitHub Actions as the repository CI provider.
+
+The initial workflow is stored at:
+
+```text
+.github/workflows/ci.yml
+```
+
+The workflow is responsible for validating the repository on GitHub-hosted
+runners before changes are considered eligible for protected-branch merging.
+
+## Workflow triggers
+
+The CI workflow runs for:
+
+```text
+pull requests targeting:
+- develop
+- main
+
+pushes to:
+- develop
+- main
+
+manual runs:
+- workflow_dispatch
+```
+
+Pull request validation is the primary trust boundary.
+
+Push validation provides an additional signal after changes land on long-lived
+branches.
+
+`workflow_dispatch` allows maintainers to manually rerun the workflow when
+investigating infrastructure or platform-specific behavior.
+
+## Toolchain ownership
+
+CI must use the same toolchain contract as local development.
+
+The repository does not maintain a separate CI-only Node.js or pnpm version.
+
+The source of truth remains:
+
+```text
+mise.toml
+mise.lock
+package.json
+pnpm-workspace.yaml
+```
+
+The GitHub Actions workflow uses `jdx/mise-action`.
+
+The action installs the repository toolchain using the committed mise
+configuration and lock file.
+
+The intended relationship is:
+
+```text
+Local development
+        |
+        v
+mise.toml + mise.lock
+        |
+        +--> Node.js 24.19.0
+        |
+        +--> pnpm 11.21.0
+
+GitHub Actions
+        |
+        v
+mise-action
+        |
+        v
+mise.toml + mise.lock
+        |
+        +--> Node.js 24.19.0
+        |
+        +--> pnpm 11.21.0
+```
+
+This prevents local development and CI from developing independent toolchain
+version policies.
+
+## Native platform matrix
+
+The initial required native CI matrix validates:
+
+| Platform | Architecture | Runner             |
+| -------- | ------------ | ------------------ |
+| Linux    | x64          | `ubuntu-24.04`     |
+| Linux    | ARM64        | `ubuntu-24.04-arm` |
+| macOS    | ARM64        | `macos-26`         |
+| Windows  | x64          | `windows-2025`     |
+
+Each required native environment runs:
+
+```text
+toolchain installation
+dependency installation
+format validation
+linting
+TypeScript validation
+repository build
+```
+
+The corresponding commands are:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm format:check
+pnpm lint
+pnpm check-types
+pnpm build
+```
+
+The matrix uses:
+
+```yaml
+fail-fast: false
+```
+
+A failure on one platform therefore does not immediately cancel the remaining
+platform jobs.
+
+This is intentional because failures on other operating systems may provide
+useful compatibility information.
+
+## Windows ARM64 preview policy
+
+Windows ARM64 is also exercised using:
+
+```text
+windows-11-arm
+```
+
+The job is currently separate from the required native matrix and uses:
+
+```yaml
+continue-on-error: true
+```
+
+This means Windows ARM64 results are visible, but the job does not currently
+block the repository CI gate.
+
+The reason is that the GitHub-hosted Windows ARM64 runner is currently treated
+as preview infrastructure.
+
+This policy must be reevaluated when the runner becomes sufficiently stable for
+the repository to rely on it as a required merge condition.
+
+The target architecture itself is not considered optional.
+
+Only its current CI enforcement level is temporary.
+
+## UI browser validation
+
+Storybook browser tests are intentionally not repeated on every operating
+system in the native matrix.
+
+The dedicated browser job currently runs on:
+
+```text
+Ubuntu 24.04 x64
+```
+
+It performs:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm --filter @repo/ui exec playwright install --with-deps chromium
+pnpm --filter @repo/ui test-storybook
+pnpm --filter @repo/ui build-storybook
+```
+
+This job verifies:
+
+- Chromium installation
+- Storybook browser tests
+- Storybook production build
+
+Cross-platform repository compatibility is validated by the native matrix.
+
+Browser behavior is validated once in the dedicated UI job to avoid
+unnecessary browser downloads and duplicated test execution across every
+runner.
+
+The browser matrix may be expanded later if product requirements justify it.
+
+## CI Gate
+
+The workflow exposes a stable required result named:
+
+```text
+CI Gate
+```
+
+The gate depends on:
+
+```text
+native
+ui-browser
+```
+
+The gate succeeds only when both required job groups complete successfully.
+
+Windows ARM64 preview validation is intentionally excluded from the gate for
+now.
+
+The purpose of the stable gate is to provide a durable contract for future
+GitHub branch protection.
+
+Instead of coupling repository rules to every individual matrix-generated check
+name, branch protection can require the single stable:
+
+```text
+CI Gate
+```
+
+check.
+
+When the required validation matrix changes, the workflow can evolve without
+requiring the branch protection model to be redesigned around every matrix
+entry.
+
+## Dependency installation
+
+CI uses:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+The lockfile must not be modified by CI.
+
+A dependency graph that requires lockfile mutation is considered invalid for
+the current commit.
+
+Dependency lifecycle-script policy remains controlled by the repository's
+`pnpm-workspace.yaml`.
+
+## Action dependency security
+
+External GitHub Actions dependencies are pinned to full commit SHAs rather than
+floating tags.
+
+The initial pins are:
+
+```text
+actions/checkout
+v7.0.1
+3d3c42e5aac5ba805825da76410c181273ba90b1
+
+jdx/mise-action
+v4.2.5
+3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518
+```
+
+The human-readable release version remains next to the SHA as a comment in the
+workflow.
+
+For example:
+
+```yaml
+uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+```
+
+This preserves reviewability while ensuring the executed Action revision is
+immutable.
+
+Action upgrades must be reviewed as dependency upgrades.
+
+## Checkout credential policy
+
+The checkout Action uses:
+
+```yaml
+persist-credentials: false
+```
+
+CI validation jobs do not require persistent Git credentials after checkout.
+
+Credentials therefore should not remain configured in the local checkout for
+subsequent workflow steps.
+
+## Workflow permissions
+
+The workflow declares:
+
+```yaml
+permissions:
+  contents: read
+```
+
+The validation workflow does not require repository write access.
+
+Additional permissions must only be introduced when a workflow requirement
+explicitly needs them.
+
+## Concurrency
+
+The workflow groups runs by workflow and Git reference:
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+When a newer run supersedes an older run for the same reference, the older run
+can be cancelled.
+
+This reduces wasted CI execution for outdated commits.
+
+## Timeouts
+
+Long-running validation jobs have explicit timeouts.
+
+The initial policy is:
+
+```text
+native jobs       30 minutes
+Windows ARM64     30 minutes
+UI browser job    30 minutes
+CI Gate            5 minutes
+```
+
+A hung process should not consume runner resources indefinitely.
+
+Timeout values may be adjusted later using observed CI execution data.
+
+## musl validation
+
+The repository targets both glibc and musl Linux environments.
+
+The initial workflow does not yet claim musl CI verification.
+
+The remaining dedicated targets are:
+
+```text
+Linux x64 musl
+Linux ARM64 musl
+```
+
+These targets require a deliberately designed Alpine or equivalent musl
+validation strategy.
+
+They must not be marked as CI verified until the workflow actually runs the
+toolchain and project validation in a musl environment.
+
+musl CI support is therefore deferred to a follow-up implementation within the
+cross-platform CI work.
+
+## Relationship to local hooks
+
+Lefthook and GitHub Actions serve different purposes.
+
+```text
+Lefthook
+    |
+    +--> fast local developer feedback
+    +--> pre-commit validation
+    +--> pre-push validation
+
+GitHub Actions
+    |
+    +--> remote independent validation
+    +--> clean runner environments
+    +--> cross-platform validation
+    +--> future branch-protection trust boundary
+```
+
+CI does not replace local hooks.
+
+Local hooks do not replace CI.
+
+Where practical, both systems should invoke the same repository scripts rather
+than maintaining independent validation implementations.
+
+## Branch protection
+
+Branch protection is not introduced by this ADR itself.
+
+After the CI workflow has successfully run and stable check names are confirmed,
+repository rules should be configured separately.
+
+The intended required check is:
+
+```text
+CI Gate
+```
+
+Branch protection configuration must not be enabled against an unverified or
+unstable check name.
+
+## Cross-platform documentation policy
+
+Documentation must distinguish between:
+
+```text
+targeted
+locally tested
+CI exercised
+CI required
+unsupported
+```
+
+Adding a platform to this workflow does not automatically make it a supported
+or verified platform.
+
+The repository's cross-platform support documentation should only be upgraded
+from targeted to CI verified after successful GitHub Actions execution has been
+observed.
+
+## Alternatives considered
+
+### Local hooks only
+
+Rejected.
+
+Local hooks cannot provide an independent remote trust boundary and cannot prove
+behavior on operating systems other than the contributor's machine.
+
+### Separate CI-specific Node.js and pnpm setup
+
+Rejected.
+
+Using independent GitHub Actions setup steps for versions already owned by mise
+would create multiple toolchain sources of truth.
+
+### Run all browser tests on every operating system
+
+Deferred.
+
+The initial value does not justify the additional browser installation and
+execution cost.
+
+The native matrix already validates repository build compatibility across
+operating systems.
+
+### Make Windows ARM64 immediately required
+
+Deferred.
+
+The architecture remains an official target, but the current runner maturity
+does not yet justify making it a hard merge gate.
+
+### Claim musl support without dedicated CI
+
+Rejected.
+
+Target support documentation must reflect actual validation rather than
+assumptions.
+
+## Consequences
+
+### Positive
+
+- CI becomes independent of developer machines.
+- Repository validation runs on multiple operating systems and architectures.
+- Local and remote environments share one toolchain contract.
+- Action dependencies are immutable through full-SHA pinning.
+- CI permissions remain minimal.
+- A stable CI Gate can later integrate with branch protection.
+- Platform failures become visible before release.
+- Browser validation becomes reproducible remotely.
+
+### Negative
+
+- Pull requests require more remote compute and execution time.
+- Multi-platform failures may require operating-system-specific investigation.
+- GitHub-hosted runner availability becomes an infrastructure dependency.
+- Windows ARM64 cannot yet be treated as a required validation result.
+- musl coverage requires additional CI work.
+- Action dependency SHAs require deliberate maintenance.
+
+## Follow-up work
+
+After the initial workflow is pushed:
+
+1. Observe the first real GitHub Actions execution.
+2. Fix platform-specific failures without weakening the intended validation.
+3. Confirm stable job and check names.
+4. Update cross-platform support documentation with actual CI results.
+5. Add Linux x64 musl validation.
+6. Add Linux ARM64 musl validation.
+7. Reevaluate Windows ARM64 enforcement.
+8. Configure branch protection and require `CI Gate`.
+9. Continue with security and dependency remediation after the CI trust boundary
+   is established.
+
+## Supersession
+
+If the CI provider, runner strategy, toolchain ownership model, or required gate
+policy changes materially, create a new ADR that supersedes this one rather
+than rewriting this decision history.

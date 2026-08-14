@@ -57,13 +57,42 @@ Lefthook operates locally and can be bypassed.
 
 Some pushes that contain no matching file changes, such as remote branch deletion, can cause pre-push jobs to be skipped.
 
-Remote CI and branch protection should eventually provide authoritative repository enforcement.
+GitHub Actions now defines the remote validation layer.
 
-## GitHub CI
+Branch protection remains follow-up work and should only be enabled after the remote workflow has successfully executed and the final required check name is confirmed.
 
-Pull requests currently may report no remote checks when no GitHub Actions workflow is configured.
+## GitHub CI rollout
 
-Local pre-commit and pre-push hooks provide validation today, but remote checks should be added separately.
+The repository now defines:
+
+```text
+.github/workflows/ci.yml
+```
+
+The workflow provides remote validation for:
+
+- frozen dependency installation
+- formatting
+- linting
+- type checking
+- repository builds
+- native Linux, macOS, and Windows environments
+- Storybook browser tests
+- Storybook production builds
+
+The current rollout is not yet considered complete.
+
+Before CI is described as authoritative repository enforcement:
+
+1. the workflow must be pushed to GitHub
+2. a pull request run must execute successfully
+3. platform-specific failures must be resolved
+4. the stable `CI Gate` check name must be confirmed
+5. branch protection must be configured separately
+
+Linux musl validation remains pending dedicated CI implementation.
+
+Windows ARM64 currently runs as preview, non-blocking validation.
 
 ## Toolchain upgrade tracking
 
