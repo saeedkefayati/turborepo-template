@@ -5,71 +5,173 @@ sidebar_position: 3
 
 # Pull Requests
 
-GitHub Pull Requests are used to merge completed branches into their target branch.
+GitHub Pull Requests are used to merge completed branches into their target
+branch.
+
+Most regular development branches target:
+
+```text
+develop
+```
+
+Pull requests should be created only after the branch is ready for remote
+validation.
 
 ## Push a branch
+
+Push the current branch and configure its upstream:
 
 ```bash
 git push -u origin <branch>
 ```
 
-The repository pre-push hooks run before the branch reaches the remote.
+Repository pre-push hooks run before the branch reaches the remote.
+
+The pre-push workflow validates areas such as formatting, linting, type safety,
+tests, builds, and branch policy.
 
 ## Create a pull request
 
-GitHub CLI can create the PR directly from the terminal:
+GitHub CLI can create a pull request directly from the terminal:
 
 ```bash
 gh pr create \
   --base develop \
-  --head <branch>
+  --head <branch> \
+  --title "<title>" \
+  --body "<description>"
 ```
 
-Review the current pull request:
+The pull request title should follow the same concise semantic style used by
+repository commits.
+
+Review the pull request:
 
 ```bash
-gh pr view
+gh pr view <branch>
 ```
 
-Check remote CI status:
+## Wait for remote checks
+
+Use GitHub CLI to wait for the pull request checks:
 
 ```bash
-gh pr checks
+gh pr checks <branch> \
+  --watch \
+  --interval 10 \
+  --fail-fast
 ```
+
+After the watch completes, the final state can be inspected with:
+
+```bash
+gh pr checks <branch>
+```
+
+A successful merge requires the repository's required remote quality gate to
+pass.
+
+Conditionally disabled CI jobs may appear as skipped. A skipped conditional job
+is not itself a failure when the repository CI configuration intentionally does
+not require that tier for the current change.
+
+The stable aggregate result is:
+
+```text
+CI Gate
+```
+
+## Check merge readiness
+
+Before merging, inspect the pull request state:
+
+```bash
+gh pr view <branch> \
+  --json number,title,state,mergeable,reviewDecision,statusCheckRollup
+```
+
+The pull request should remain open, be mergeable, and have all required
+quality checks satisfied before the merge command is executed.
 
 ## Merge
 
-For feature and documentation branches, merge commits preserve the branch boundary in repository history.
+The repository uses merge commits for regular pull requests so the branch
+boundary remains visible in Git history.
 
-Interactive merge:
+Merge the pull request and remove the completed branch:
 
 ```bash
-gh pr merge
+gh pr merge <branch> \
+  --merge \
+  --delete-branch
 ```
 
-Or explicitly:
+Do not use `--squash` or `--rebase` when the repository workflow requires merge
+commits.
+
+The `--delete-branch` option normally removes the merged feature branch after
+the pull request is completed.
+
+## Verify the merge
+
+Confirm the final pull request state:
 
 ```bash
-gh pr merge --merge
+gh pr view <branch> \
+  --json number,title,state,mergedAt,url
+```
+
+The expected state is:
+
+```text
+MERGED
 ```
 
 ## After merging
 
-Update the target branch:
+Return to the integration branch and synchronize it with the remote:
 
 ```bash
 git switch develop
 git pull --ff-only origin develop
+git fetch origin --prune
 ```
 
-Delete the merged local branch:
+Verify the final repository state:
+
+```bash
+git branch -vv
+git status --short
+```
+
+The working tree should be clean before starting the next branch.
+
+## Manual branch cleanup
+
+Manual cleanup is normally unnecessary when:
+
+```bash
+gh pr merge <branch> \
+  --merge \
+  --delete-branch
+```
+
+successfully removes the completed branch.
+
+If cleanup is still required, delete the local merged branch with:
 
 ```bash
 git branch -d <branch>
 ```
 
-Delete the remote branch:
+Delete the remote branch with:
 
 ```bash
 git push origin --delete <branch>
+```
+
+Then prune stale remote-tracking references:
+
+```bash
+git fetch origin --prune
 ```
