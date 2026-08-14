@@ -21,4 +21,5 @@
   --color-danger: var(--ds-danger);
   --color-danger-hover: var(--ds-danger-hover);
   --color-danger-foreground: var(--ds-danger-foreground);
+  --color-danger-text: var(--ds-danger-text);
 }
