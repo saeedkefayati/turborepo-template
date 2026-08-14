@@ -1,0 +1,323 @@
+---
+title: "ADR-010: Tiered CI Execution"
+description: "Adopt fast pull-request validation for develop and reserve the full cross-platform matrix for main and explicit full-validation runs."
+---
+
+# ADR-010: Tiered CI Execution
+
+## Status
+
+Accepted
+
+## Date
+
+2026-08-14
+
+## Context
+
+ADR-009 introduced GitHub Actions as the repository remote CI system and
+successfully verified the initial cross-platform matrix.
+
+The initial policy ran the full CI matrix for:
+
+```text
+pull requests targeting develop
+pull requests targeting main
+pushes to develop
+pushes to main
+```
+
+The first remote executions confirmed that the architecture and platform matrix
+work correctly.
+
+However, running the complete native matrix for routine pull requests targeting
+`develop` creates unnecessary latency and repeated runner work.
+
+A typical development change does not require all supported operating systems to
+be exercised on every synchronization event.
+
+The repository still requires:
+
+- reliable validation before changes enter `develop`
+- full cross-platform validation before changes enter `main`
+- a stable required status-check name
+- manual access to the full validation matrix
+- continued visibility into Windows ARM64 compatibility
+
+## Decision
+
+Adopt a tiered CI execution policy.
+
+CI is divided into:
+
+```text
+Fast CI
+Full CI
+```
+
+## Fast CI
+
+Fast CI runs for pull requests targeting:
+
+```text
+develop
+```
+
+It runs on:
+
+```text
+Ubuntu x64
+```
+
+and validates:
+
+```text
+frozen dependency installation
+formatting
+linting
+TypeScript
+repository builds
+Storybook Chromium tests
+Storybook production build
+```
+
+The purpose of Fast CI is to provide a meaningful remote trust boundary without
+running the complete cross-platform matrix for normal development pull requests.
+
+The Fast CI job intentionally combines repository and Storybook validation in a
+single runner so checkout, toolchain installation, and dependency installation
+are not duplicated.
+
+## Full CI
+
+Full CI runs for:
+
+```text
+pull requests targeting main
+pushes to main
+workflow_dispatch
+```
+
+The full native matrix includes:
+
+```text
+Linux x64
+Linux ARM64
+macOS ARM64
+Windows x64
+```
+
+Windows ARM64 continues to run separately as preview, non-blocking validation.
+
+Storybook Chromium validation also runs as a dedicated Full CI job.
+
+## Develop push policy
+
+CI does not run again after a successful pull request is merged into:
+
+```text
+develop
+```
+
+This removes duplicate validation where the same change would otherwise receive:
+
+```text
+pull_request CI
++
+post-merge develop push CI
+```
+
+The pull request check remains the trust boundary for `develop`.
+
+## Main push policy
+
+Pushes to:
+
+```text
+main
+```
+
+continue to run Full CI.
+
+This provides post-merge validation of the exact commit that becomes part of the
+primary branch.
+
+## Stable CI Gate
+
+The repository retains one stable aggregation check:
+
+```text
+CI Gate
+```
+
+For a pull request targeting `develop`, `CI Gate` requires:
+
+```text
+Fast / Ubuntu x64
+```
+
+For Full CI, `CI Gate` requires:
+
+```text
+Native matrix
+UI / Storybook Chromium
+```
+
+Windows ARM64 remains outside the required gate while its runner is treated as
+preview infrastructure.
+
+This keeps branch-protection configuration independent from internal job names
+and matrix expansion.
+
+## Conditional execution
+
+The workflow uses GitHub Actions job conditions to select the appropriate CI
+tier.
+
+For pull requests, the target branch is determined from:
+
+```text
+github.base_ref
+```
+
+The workflow itself remains active for both `develop` and `main` pull requests.
+
+Jobs that do not belong to the selected CI tier are skipped by job-level
+conditions.
+
+`CI Gate` uses:
+
+```text
+if: always()
+```
+
+so it can evaluate the results of the selected tier even when other jobs were
+intentionally skipped.
+
+## Toolchain and security policy
+
+This decision does not change the toolchain or security model established by
+ADR-009.
+
+CI continues to use:
+
+```text
+mise.toml
+mise.lock
+package.json
+pnpm-workspace.yaml
+```
+
+External Actions remain pinned to full commit SHAs.
+
+Checkout credentials remain non-persistent.
+
+Workflow permissions remain:
+
+```yaml
+permissions:
+  contents: read
+```
+
+## Cross-platform support
+
+This decision changes validation frequency, not the repository support matrix.
+
+The previously successful remote runs remain valid evidence that the repository
+has executed successfully on:
+
+```text
+Linux x64
+Linux ARM64
+macOS ARM64
+Windows x64
+Windows ARM64 preview
+```
+
+Linux musl validation remains pending dedicated implementation.
+
+## Consequences
+
+### Positive
+
+- routine pull requests to `develop` receive faster remote feedback
+- duplicate post-merge `develop` runs are eliminated
+- full cross-platform validation remains associated with `main`
+- Storybook validation remains part of the remote trust boundary
+- the stable `CI Gate` contract is preserved
+- runner usage is reduced without removing pre-merge validation
+
+### Negative
+
+- platform-specific regressions may first become visible when changes approach
+  `main`
+- Fast CI does not independently prove Windows or macOS compatibility for every
+  development pull request
+- the workflow contains additional conditional logic
+- maintainers must preserve correct Fast CI and Full CI gate semantics as the
+  workflow evolves
+
+## Alternatives considered
+
+### Run Full CI on every pull request and long-lived branch push
+
+Rejected.
+
+This provides maximum repetition but adds unnecessary latency and duplicates
+validation after merges into `develop`.
+
+### Run CI only on main
+
+Rejected.
+
+This delays remote validation until changes are too close to the primary branch
+and removes the useful pre-merge trust boundary for `develop`.
+
+### Remove cross-platform CI
+
+Rejected.
+
+Cross-platform behavior is part of the repository's explicit support policy.
+
+### Remove Storybook from Fast CI
+
+Rejected.
+
+UI browser validation is part of the current repository quality contract and
+should remain visible before changes enter `develop`.
+
+## Relationship to ADR-009
+
+This ADR partially supersedes ADR-009 only for:
+
+```text
+workflow trigger frequency
+CI tier selection
+develop push behavior
+required gate inputs
+```
+
+ADR-009 remains authoritative for:
+
+```text
+GitHub Actions provider selection
+toolchain ownership
+native platform definitions
+Windows ARM64 preview policy
+Storybook browser strategy
+security permissions
+SHA pinning
+concurrency policy
+timeouts
+musl support policy
+```
+
+## Follow-up work
+
+After this policy is verified remotely:
+
+1. configure branch protection around `CI Gate`
+2. consolidate repository-owned test and quality commands
+3. add dedicated Linux musl validation
+4. reevaluate Windows ARM64 enforcement when runner maturity permits it
+5. continue dependency and security remediation

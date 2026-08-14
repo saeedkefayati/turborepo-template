@@ -43,25 +43,36 @@ for future branch protection.
 
 ## Triggers
 
-CI runs for pull requests targeting:
+CI uses two execution tiers.
+
+### Fast CI
+
+Fast CI runs for pull requests targeting:
 
 ```text
 develop
-main
 ```
 
-It also runs after pushes to:
+It runs the repository validation and Storybook browser checks on Ubuntu x64.
+
+### Full CI
+
+Full CI runs for:
 
 ```text
-develop
-main
-```
-
-A manual run is available through:
-
-```text
+pull requests targeting main
+pushes to main
 workflow_dispatch
 ```
+
+Pushes to `develop` do not trigger another CI run after a pull request is
+merged.
+
+This avoids duplicating the same repository validation immediately after a
+successful pull request.
+
+The workflow remains configured for both `develop` and `main` pull requests so
+the stable `CI Gate` check can be used consistently.
 
 ## Toolchain
 
@@ -214,30 +225,45 @@ The final required aggregation job is:
 CI Gate
 ```
 
-It depends on:
+Its required inputs depend on the CI tier.
+
+For pull requests targeting `develop`:
 
 ```text
-native
-ui-browser
+Fast / Ubuntu x64
+        |
+        v
+     CI Gate
 ```
 
-It intentionally does not currently depend on:
+For Full CI:
 
 ```text
-windows-arm64
+Native matrix
+      |
+      +------+
+             |
+UI / Storybook Chromium
+             |
+             v
+          CI Gate
 ```
 
-because that job is non-blocking.
+Windows ARM64 remains intentionally excluded from the required gate while its
+runner is treated as preview infrastructure.
 
-The expected future branch protection contract is:
+The expected branch-protection contract remains:
 
 ```text
 Required status check:
 CI Gate
 ```
 
-Do not configure that rule until an actual workflow run confirms the final check
-name and behavior.
+The stable gate name allows the internal CI topology to evolve without requiring
+branch-protection rules to depend on individual matrix-generated job names.
+
+The gate uses `always()` so it still executes after required dependencies fail
+or tier-specific jobs are intentionally skipped.
 
 ## Local equivalents
 
